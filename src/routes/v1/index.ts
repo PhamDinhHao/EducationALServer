@@ -5,6 +5,11 @@ import authRoute from './auth.route'
 import assetRoute from './asset.route'
 import templateRoute from './template.route'
 import sentenceRoute from './sentence.route'
+import geminiRoute from './gemini.route'
+import lessonRoute from './lesson.route'
+import planRoute from './plan.route'
+import exerciseRoute from './exercise.route'
+
 
 const router = express.Router()
 
@@ -32,7 +37,24 @@ const defaultRoutes = [
   {
     path: '/sentences',
     route: sentenceRoute
-  }
+  },
+  {
+    path: '/gemini',
+    route: geminiRoute
+  },
+  {
+    path: '/lessons',
+    route: lessonRoute
+  },
+  {
+    path: '/plan',
+    route: planRoute
+  },
+  {
+    path: '/exercise',
+    route: exerciseRoute
+  },
+  
 ]
 
 // const devRoutes = [
