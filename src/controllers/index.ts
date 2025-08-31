@@ -3,3 +3,5 @@ export { default as authController } from './auth.controller'
 export { default as templateController } from './template.controller'
 export { default as assetController } from './asset.controller'
 export { default as sentenceController } from './sentence.controller'
+export { default as geminiController } from './gemini.controller'
+
