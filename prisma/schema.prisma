@@ -109,3 +109,79 @@ model Sentence {
 
   @@map("sentences")
 }
+model Course {
+  id             Int       @id @default(autoincrement())
+  title          String
+  description    String
+  img            String
+  url            String?   // optional
+  courseType     String    @default("general") // mặc định "general"
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+
+  // Mối quan hệ
+  fields         Field[]          // liên kết với Field
+  fieldsCourse   CourseField[]    // quan hệ ngược lại
+  lessons        Lesson[]         // liên kết với Lesson
+
+  // Trường mới
+  author        String            @default("unknown")
+  studentCount  Int               @default(0) // số học viên
+  totalDuration Int               @default(0) // tổng thời lượng tính bằng phút (hoặc giây)
+  
+  // Giá khóa học
+  price         Float?            @default(0) // giá khóa học, optional, mặc định 0
+  
+  // Giới thiệu dạng mảng lưu trong JSON
+  introductions Json?             @db.Json
+}
+
+model Lesson {
+  id        Int       @id @default(autoincrement())
+  title     String
+  duration  String
+  src       String
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  Comment   Comment[]
+}
+
+model Field {
+  id        Int       @id @default(autoincrement())
+  name      String
+  value     String
+  courseId  Int
+  course    Course    @relation(fields: [courseId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  comments  Comment[] // <-- Thêm dòng này để tạo relation 2 chiều
+
+  @@map("fields")
+}
+
+model CourseField {
+  id        Int      @id @default(autoincrement())
+  name      String
+  value     String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  author    String
+  createdAt DateTime @default(now())
+  lessonId  Int
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  Field     Field?   @relation(fields: [fieldId], references: [id])
+  fieldId   Int?
+  // self relation cho comment 2 cấp
+  parentId  Int?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+}

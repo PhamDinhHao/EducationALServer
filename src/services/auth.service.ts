@@ -98,7 +98,7 @@ const revokeTokens = async (userId: number) => {
   await prisma.token.updateMany({
     where: {
       userId,
-      type: TokenType.BLACKLISTED,
+      type: TokenType.REFRESH,
       blacklisted: false
     },
     data: { blacklisted: true }
