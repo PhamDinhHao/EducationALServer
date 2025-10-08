@@ -20,19 +20,15 @@ const getGeminiClient = () => {
   return new GoogleGenerativeAI(apiKey)
 }
 
-// Danh sách các model để thử (theo thứ tự ưu tiên)
+// Danh sách các model để thử (theo thứ tự ưu tiên - tối ưu nhất)
 const MODELS_TO_TRY = [
-  'gemini-2.5-flash',      // Model mới nhất và nhanh nhất
-  'gemini-2.5-pro',        // Model chất lượng cao
-  'gemini-2.0-flash',      // Model ổn định
-  'gemini-2.0-flash-001',  // Model backup
-  'gemini-flash-latest',   // Model latest
-  'gemini-pro-latest'      // Model pro latest
+  'gemini-2.0-flash-001',  // 🏆 Model tối ưu nhất: nhanh nhất (2218ms), ổn định, chất lượng cao
+  'gemini-2.0-flash',      // Backup model 2.0 (2392ms)
+  'gemini-flash-latest',   // Latest fallback (6337ms)
+  'gemini-pro-latest'      // Pro latest fallback (24165ms) - chậm nhưng chất lượng cao
 ]
 
 const makeRequest = async (messages: ChatMessage[], subject: string, imageFile?: ImageFile): Promise<string> => {
-  console.log('🔹 Sending request to Gemini API using Google Generative AI SDK...')
-  console.log('🔹 Input messages:', JSON.stringify(messages, null, 2))
 
   try {
     const genAI = getGeminiClient()
@@ -44,22 +40,36 @@ const makeRequest = async (messages: ChatMessage[], subject: string, imageFile?:
     }
     
     const prompt = lastUserMessage.content
-    console.log('🔹 Using prompt:', prompt)
+
+    // Xác định temperature dựa trên loại task
+    const getTemperature = (subject: string, prompt: string): number => {
+      if (subject === 'mindmap' || prompt.includes('mindmap')) {
+        return 0.3 // Thấp cho JSON structure
+      } else if (subject === 'review' || prompt.includes('ôn tập')) {
+        return 0.5 // Trung bình cho educational content
+      } else if (subject === 'exercise' || prompt.includes('giải bài')) {
+        return 0.2 // Rất thấp cho accuracy
+      } else if (prompt.includes('GDPT 2018')) {
+        return 0.4 // Thấp cho curriculum compliance
+      }
+      return 0.7 // Default
+    }
+
+    const temperature = getTemperature(subject, prompt)
 
     // Thử các model theo thứ tự ưu tiên
     for (let i = 0; i < MODELS_TO_TRY.length; i++) {
       const modelName = MODELS_TO_TRY[i]
       
       try {
-        console.log(`🔹 Trying model ${i + 1}/${MODELS_TO_TRY.length}: ${modelName}`)
         
         const model = genAI.getGenerativeModel({ 
           model: modelName,
           generationConfig: {
-            temperature: 0.7,
+            temperature: temperature,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 8192, // Tăng từ 4096 lên 8192 để có đủ không gian cho nội dung đầy đủ
+            maxOutputTokens: 16384, // Tăng lên 16384 để có đủ không gian cho mindmap chi tiết 3 cấp độ
           }
         })
 
@@ -80,7 +90,6 @@ const makeRequest = async (messages: ChatMessage[], subject: string, imageFile?:
         }
 
         // Sử dụng generateContent đơn giản
-        console.log('🔹 Using simple generateContent')
         const result = await model.generateContent(promptParts)
         const response = await result.response
         const text = response.text()
@@ -89,29 +98,23 @@ const makeRequest = async (messages: ChatMessage[], subject: string, imageFile?:
           throw new Error('Gemini không trả về nội dung')
         }
         
-        console.log(`✅ Model ${modelName} hoạt động tốt!`)
-        console.log(`📝 Response length: ${text.length} characters`)
         
         // Kiểm tra xem response có bị cắt cụt không
         if (text.length < 100) {
-          console.warn(`⚠️ Response quá ngắn (${text.length} chars), có thể bị cắt`)
         }
         
         // Kiểm tra xem có kết thúc đột ngột không
         const lastWords = text.trim().split(' ').slice(-3).join(' ')
         if (lastWords.includes('**4) Mẹo ghi') || text.endsWith('---') || text.endsWith('**4)')) {
-          console.warn('⚠️ Response có vẻ bị cắt cụt ở phần cuối')
         }
         
         return text
         
       } catch (error: any) {
         const errorMessage = error.message || error.toString()
-        console.error(`❌ Model ${modelName} failed:`, errorMessage)
         
         // Nếu không phải model cuối cùng, thử model tiếp theo
         if (i < MODELS_TO_TRY.length - 1) {
-          console.log(`🔄 Thử model tiếp theo...`)
           continue
         } else {
           // Model cuối cùng cũng fail
