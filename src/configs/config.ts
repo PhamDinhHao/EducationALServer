@@ -18,7 +18,8 @@ const envValidation = z.object({
   SMTP_USERNAME: z.string(),
   SMTP_PASSWORD: z.string(),
   EMAIL_FROM: z.string(),
-  CLOUDINARY_URL: z.string()
+  CLOUDINARY_URL: z.string(),
+  GEMINI_API_KEY: z.string().optional()
 })
 
 const envVars = envValidation.parse(process.env)
@@ -51,5 +52,8 @@ export default {
   },
   cloudinary: {
     url: envVars.CLOUDINARY_URL
+  },
+  gemini: {
+    apiKey: envVars.GEMINI_API_KEY
   }
 }

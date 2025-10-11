@@ -5,3 +5,4 @@ export { default as assetController } from './asset.controller'
 export { default as sentenceController } from './sentence.controller'
 export { default as geminiController } from './gemini.controller'
 
+export { default as aiController } from './ai.controller'
