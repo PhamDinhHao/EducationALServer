@@ -87,6 +87,7 @@ model Lesson {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
   Comment   Comment[]
+  Course    Course    @relation(fields: [courseId], references: [id])
 
   @@index([courseId], map: "Lesson_courseId_fkey")
 }
@@ -133,7 +134,7 @@ model Comment {
   @@index([parentId], map: "Comment_parentId_fkey")
 }
 
-model course {
+model Course {
   id            Int      @id @default(autoincrement())
   title         String
   description   String
@@ -147,6 +148,10 @@ model course {
   totalDuration Int      @default(0)
   price         Float?   @default(0)
   introductions Json?
+
+  lessons Lesson[]
+
+  @@map("course")
 }
 
 enum Role {
