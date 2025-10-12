@@ -27,11 +27,11 @@ if (config.env !== 'test') {
 // set security HTTP headers
 app.use(helmet())
 
-// parse json request body
-app.use(express.json())
+// parse json request body (increase limit for base64 images)
+app.use(express.json({ limit: '50mb' }))
 
-// parse urlencoded request body
-app.use(express.urlencoded({ extended: true }))
+// parse urlencoded request body (increase limit for large payloads)
+app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 
 // parse cookies
 app.use(cookieParser())
@@ -71,7 +71,6 @@ if (config.env === 'production') {
 
 // v1 api routes
 app.use('/api/v1', routes)
-
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {

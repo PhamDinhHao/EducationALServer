@@ -5,10 +5,16 @@ import authRoute from './auth.route'
 import assetRoute from './asset.route'
 import templateRoute from './template.route'
 import sentenceRoute from './sentence.route'
-import courseRoutes from './course.route'  // chú ý: courseRoutes (plural) giống với export default
+import courseRoutes from './course.route' // chú ý: courseRoutes (plural) giống với export default
 import fieldRoutes from './field.route'
 import lessonRoutes from './lesson.routes'
 import commentRoutes from './comment.routes'
+import geminiRoute from './gemini.route'
+import lessonRoute from './lesson.route'
+import planRoute from './plan.route'
+import exerciseRoute from './exercise.route'
+
+import aiRoute from './ai.route'
 
 const router = express.Router()
 
@@ -38,45 +44,42 @@ const defaultRoutes = [
     route: sentenceRoute
   },
   {
-    path: '/courses',          // <-- thêm course route
+    path: '/gemini',
+    route: geminiRoute
+  },
+  {
+    path: '/lessons',
+    route: lessonRoute
+  },
+  {
+    path: '/plan',
+    route: planRoute
+  },
+  {
+    path: '/exercise',
+    route: exerciseRoute
+  },
+  { path: '/ai', route: aiRoute },
+  {
+    path: '/courses', // <-- thêm course route
     route: courseRoutes
   },
   {
-    path: '/field',          // <-- thêm course route
-    route: fieldRoutes  
-  }
-  ,
+    path: '/field', // <-- thêm course route
+    route: fieldRoutes
+  },
   {
-    path: '/lesson',          // <-- thêm course route
-    route: lessonRoutes  
-  }
-  ,
+    path: '/lesson', // <-- thêm course route
+    route: lessonRoutes
+  },
   {
-    path: '/comment',          // <-- thêm course route
-    route: commentRoutes  
+    path: '/comment', // <-- thêm course route
+    route: commentRoutes
   }
-   ,
-
-  
 ]
-
-// const devRoutes = [
-//   // routes available only in development mode
-//   {
-//     path: '/docs',
-//     route: docsRoute
-//   }
-// ]
 
 defaultRoutes.forEach((route) => {
   router.use(route.path, route.route)
 })
-
-/* istanbul ignore next */
-// if (config.env === 'development') {
-//   devRoutes.forEach((route) => {
-//     router.use(route.path, route.route)
-//   })
-// }
 
 export default router
