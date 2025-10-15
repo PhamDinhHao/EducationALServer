@@ -7,5 +7,3 @@ router.post('/generate', aiController.generateWithMessages)
 router.post('/generate-text', aiController.generateText)
 
 export default router
-
-

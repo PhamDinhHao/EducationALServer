@@ -1,16 +1,17 @@
 import { Server } from 'http'
-
 import app from './app'
 import prisma from './client'
-
 import config from '@configs/config'
 import logger from '@configs/logger'
 
 let server: Server
+
+const PORT = process.env.PORT || config.port || 3000
+
 prisma.$connect().then(() => {
   logger.info('Connected to SQL Database')
-  server = app.listen(config.port, () => {
-    logger.info(`Listening to port ${config.port}`)
+  server = app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`)
   })
 })
 

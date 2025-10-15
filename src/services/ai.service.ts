@@ -22,23 +22,22 @@ const getGeminiClient = () => {
 
 // Danh sách các model để thử (theo thứ tự ưu tiên - tối ưu nhất)
 const MODELS_TO_TRY = [
-  'gemini-2.0-flash-001',  // 🏆 Model tối ưu nhất: nhanh nhất (2218ms), ổn định, chất lượng cao
-  'gemini-2.0-flash',      // Backup model 2.0 (2392ms)
-  'gemini-flash-latest',   // Latest fallback (6337ms)
-  'gemini-pro-latest'      // Pro latest fallback (24165ms) - chậm nhưng chất lượng cao
+  'gemini-2.0-flash-001', // 🏆 Model tối ưu nhất: nhanh nhất (2218ms), ổn định, chất lượng cao
+  'gemini-2.0-flash', // Backup model 2.0 (2392ms)
+  'gemini-flash-latest', // Latest fallback (6337ms)
+  'gemini-pro-latest' // Pro latest fallback (24165ms) - chậm nhưng chất lượng cao
 ]
 
 const makeRequest = async (messages: ChatMessage[], subject: string, imageFile?: ImageFile): Promise<string> => {
-
   try {
     const genAI = getGeminiClient()
-    
+
     // Lấy message cuối cùng từ user
-    const lastUserMessage = messages.filter(msg => msg.role === 'user').pop()
+    const lastUserMessage = messages.filter((msg) => msg.role === 'user').pop()
     if (!lastUserMessage) {
       throw new Error('No user message found')
     }
-    
+
     const prompt = lastUserMessage.content
 
     // Xác định temperature dựa trên loại task
@@ -60,27 +59,26 @@ const makeRequest = async (messages: ChatMessage[], subject: string, imageFile?:
     // Thử các model theo thứ tự ưu tiên
     for (let i = 0; i < MODELS_TO_TRY.length; i++) {
       const modelName = MODELS_TO_TRY[i]
-      
+
       try {
-        
-        const model = genAI.getGenerativeModel({ 
+        const model = genAI.getGenerativeModel({
           model: modelName,
           generationConfig: {
             temperature: temperature,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 16384, // Tăng lên 16384 để có đủ không gian cho mindmap chi tiết 3 cấp độ
+            maxOutputTokens: 16384 // Tăng lên 16384 để có đủ không gian cho mindmap chi tiết 3 cấp độ
           }
         })
 
         // Tạo prompt parts
         const promptParts: any[] = [{ text: prompt }]
-        
+
         if (imageFile) {
           if (!imageFile.base64Data || imageFile.base64Data.trim() === '') {
             throw new Error('Image data is empty')
           }
-          
+
           promptParts.push({
             inlineData: {
               mimeType: imageFile.mimeType,
@@ -93,26 +91,24 @@ const makeRequest = async (messages: ChatMessage[], subject: string, imageFile?:
         const result = await model.generateContent(promptParts)
         const response = await result.response
         const text = response.text()
-        
+
         if (!text) {
           throw new Error('Gemini không trả về nội dung')
         }
-        
-        
+
         // Kiểm tra xem response có bị cắt cụt không
         if (text.length < 100) {
         }
-        
+
         // Kiểm tra xem có kết thúc đột ngột không
         const lastWords = text.trim().split(' ').slice(-3).join(' ')
         if (lastWords.includes('**4) Mẹo ghi') || text.endsWith('---') || text.endsWith('**4)')) {
         }
-        
+
         return text
-        
       } catch (error: any) {
         const errorMessage = error.message || error.toString()
-        
+
         // Nếu không phải model cuối cùng, thử model tiếp theo
         if (i < MODELS_TO_TRY.length - 1) {
           continue
@@ -122,9 +118,8 @@ const makeRequest = async (messages: ChatMessage[], subject: string, imageFile?:
         }
       }
     }
-    
+
     throw new Error('Không có model nào hoạt động')
-    
   } catch (error: any) {
     console.error('❌ Gemini API error:', error.message)
     throw new Error(`Gemini API error: ${error.message}`)
@@ -136,5 +131,3 @@ const generateText = async (prompt: string): Promise<string> => {
 }
 
 export default { makeRequest, generateText }
-
-

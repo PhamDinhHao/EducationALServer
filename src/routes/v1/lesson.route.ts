@@ -1,20 +1,20 @@
-import express from "express";
-import validate from "@/middlewares/validate";
-import lessonValidation from "@/validations/lesson.validation";
-import lessonController from "@/controllers/lesson.controller";
-import upload from "@/middlewares/upload";
+import express from 'express'
+import validate from '@/middlewares/validate'
+import lessonValidation from '@/validations/lesson.validation'
+import upload from '@/middlewares/upload'
+import { generateLesson } from '@/controllers/lesson.controller'
 
-const router = express.Router();
+const router = express.Router()
 
 router.post(
-  "/generate",
-  upload.single("file"),
+  '/generate',
+  upload.single('file'),
   (req, res, next) => {
-    if (req.body.periods) req.body.periods = Number(req.body.periods);
-    next();
+    if (req.body.periods) req.body.periods = Number(req.body.periods)
+    next()
   },
   validate({ body: lessonValidation.generateLesson }),
-  lessonController.generateLesson
-);
+  generateLesson
+)
 
-export default router;
+export default router

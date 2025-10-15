@@ -37,11 +37,11 @@ const generateText = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const { prompt } = req.body as { prompt: string }
     if (!prompt) return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'prompt is required' })
-    
+
     console.log('🔹 Generating text with prompt length:', prompt.length)
     const result = await aiService.generateText(prompt)
     console.log('✅ Text generation successful, result length:', result.length)
-    
+
     return res.status(httpStatus.OK).json({ success: true, data: { result } })
   } catch (error) {
     console.error('❌ Text generation failed:', error)
@@ -50,5 +50,3 @@ const generateText = async (req: Request, res: Response, next: NextFunction) => 
 }
 
 export default { generateWithMessages, generateText }
-
-
