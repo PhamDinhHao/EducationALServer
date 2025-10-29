@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE `course` ADD COLUMN `author` VARCHAR(191) NOT NULL DEFAULT 'unknown',
-    ADD COLUMN `studentCount` INTEGER NOT NULL DEFAULT 0,
-    ADD COLUMN `totalDuration` INTEGER NOT NULL DEFAULT 0;

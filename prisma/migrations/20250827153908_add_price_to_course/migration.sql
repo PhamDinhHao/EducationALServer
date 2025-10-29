@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `course` ADD COLUMN `price` DOUBLE NULL DEFAULT 0;
