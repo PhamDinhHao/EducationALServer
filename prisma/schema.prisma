@@ -7,19 +7,63 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums
+enum Role {
+  USER
+  ADMIN
+
+  @@map("role_enum")
+}
+
+enum TokenType {
+  ACCESS
+  REFRESH
+  RESET_PASSWORD
+  VERIFY_EMAIL
+  BLACKLISTED
+
+  @@map("token_type_enum")
+}
+
+enum TemplateType {
+  TEXT
+  HTML
+
+  @@map("template_type_enum")
+}
+
+enum AssetType {
+  FILE
+  IMAGE
+
+  @@map("asset_type_enum")
+}
+
+enum CourseEnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+
+  @@map("course_enrollment_status_enum")
+}
+
+// Models
 model User {
-  id              Int        @id @default(autoincrement())
-  email           String     @unique
-  name            String?
-  password        String
-  role            Role       @default(USER)
-  isEmailVerified Boolean    @default(false) @map("is_email_verified")
-  createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @updatedAt @map("updated_at")
-  Asset           Asset[]
-  Sentence        Sentence[]
-  Template        Template[]
-  Token           Token[]
+  id               Int                @id @default(autoincrement())
+  email            String             @unique
+  name             String?
+  password         String
+  role             Role               @default(USER)
+  isEmailVerified  Boolean            @default(false) @map("is_email_verified")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+  Asset            Asset[]
+  Sentence         Sentence[]
+  Template         Template[]
+  Token            Token[]
+  Comment          Comment[]
+  CourseEnrollment CourseEnrollment[]
+  LessonProgress   LessonProgress[]
 
   @@map("users")
 }
@@ -78,33 +122,104 @@ model Sentence {
   @@map("sentences")
 }
 
-enum Role {
-  USER
-  ADMIN
+model CourseType {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  courses     Course[]
 
-  @@map("role_enum")
+  @@map("course_types")
 }
 
-enum TokenType {
-  ACCESS
-  REFRESH
-  RESET_PASSWORD
-  VERIFY_EMAIL
-  BLACKLISTED
+model Course {
+  id            Int                @id @default(autoincrement())
+  title         String
+  description   String             @db.Text
+  img           String?
+  url           String?
+  teacher       String
+  students      Int                @default(0)
+  duration      String?
+  courseTypeId  Int                @map("course_type_id")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+  courseType    CourseType         @relation(fields: [courseTypeId], references: [id])
+  lessons       Lesson[]
+  enrollments   CourseEnrollment[]
 
-  @@map("token_type_enum")
+  @@index([courseTypeId], map: "courses_course_type_id_fkey")
+  @@map("courses")
 }
 
-enum TemplateType {
-  TEXT
-  HTML
+model Lesson {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String           @db.Text
+  duration    Int
+  src         String
+  order       Int
+  courseId    Int              @map("course_id")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  course      Course           @relation(fields: [courseId], references: [id])
+  comments    Comment[]
+  progresses  LessonProgress[]
 
-  @@map("template_type_enum")
+  @@index([courseId], map: "lessons_course_id_fkey")
+  @@map("lessons")
 }
 
-enum AssetType {
-  FILE
-  IMAGE
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String    @db.Text
+  author    String
+  lessonId  Int       @map("lesson_id")
+  userId    Int?      @map("user_id")
+  parentId  Int?      @map("parent_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  lesson    Lesson    @relation(fields: [lessonId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id])
+  parent    Comment?  @relation("CommentToReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentToReplies")
 
-  @@map("asset_type_enum")
+  @@index([lessonId], map: "comments_lesson_id_fkey")
+  @@index([userId], map: "comments_user_id_fkey")
+  @@index([parentId], map: "comments_parent_id_fkey")
+  @@map("comments")
+}
+
+model CourseEnrollment {
+  id         Int                    @id @default(autoincrement())
+  userId     Int                    @map("user_id")
+  courseId   Int                    @map("course_id")
+  enrolledAt DateTime               @default(now()) @map("enrolled_at")
+  status     CourseEnrollmentStatus @default(ACTIVE)
+  user       User                   @relation(fields: [userId], references: [id])
+  course     Course                 @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId], map: "course_enrollments_user_id_course_id_key")
+  @@index([userId], map: "course_enrollments_user_id_fkey")
+  @@index([courseId], map: "course_enrollments_course_id_fkey")
+  @@map("course_enrollments")
+}
+
+model LessonProgress {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @map("user_id")
+  lessonId     Int       @map("lesson_id")
+  completedAt  DateTime? @map("completed_at")
+  progress     Float     @default(0)
+  lastViewedAt DateTime? @map("last_viewed_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  user         User      @relation(fields: [userId], references: [id])
+  lesson       Lesson    @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId], map: "lesson_progress_user_id_lesson_id_key")
+  @@index([userId], map: "lesson_progress_user_id_fkey")
+  @@index([lessonId], map: "lesson_progress_lesson_id_fkey")
+  @@map("lesson_progress")
 }
