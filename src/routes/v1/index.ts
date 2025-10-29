@@ -10,6 +10,12 @@ import planRoute from './plan.route'
 import exerciseRoute from './exercise.route'
 
 import aiRoute from './ai.route'
+import commentRoute from './comment.routes'
+import lessonRoute from './lesson.routes'
+import courseRoute from './course.routes'
+import courseTypeRoute from './courseType.routes'
+import enrollmentRoute from './enrollment.routes'
+import progressRoute from './progress.routes'
 
 const router = express.Router()
 
@@ -51,6 +57,12 @@ const defaultRoutes = [
     route: exerciseRoute
   },
   { path: '/ai', route: aiRoute },
+  { path: '/comment', route: commentRoute },
+  { path: '/lessons', route: lessonRoute },
+  { path: '/courses', route: courseRoute },
+  { path: '/course-types', route: courseTypeRoute },
+  { path: '/enrollments', route: enrollmentRoute },
+  { path: '/progress', route: progressRoute },
 ]
 
 defaultRoutes.forEach((route) => {
