@@ -142,6 +142,22 @@
       ]
     },
     {
+      "name": "Images",
+      "item": [
+        { "name": "List Images", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/assets" } },
+        {
+          "name": "Upload Images (files[])",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": "{{baseUrl}}/assets",
+            "body": { "mode": "formdata", "formdata": [ { "key": "files", "type": "file", "src": [] } ] }
+          }
+        },
+        { "name": "Delete Image", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/assets/1" } }
+      ]
+    },
+    {
       "name": "Sentences (requires auth)",
       "item": [
         { "name": "List Sentences", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/sentences" } },
