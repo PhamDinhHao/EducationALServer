@@ -47,4 +47,24 @@ export const deleteCourse = async (id: number) => {
   return prisma.course.delete({ where: { id } })
 }
 
+export const getTopEnrolledCourses = async (limit: number = 8) => {
+  const topCourses = await prisma.courseEnrollment.groupBy({
+    by: ['courseId'],
+    _count: { courseId: true },
+    orderBy: { _count: { courseId: 'desc' } },
+    take: limit,
+  });
+
+  const courseIds = topCourses.map((item) => item.courseId);
+  const courses = await prisma.course.findMany({
+    where: { id: { in: courseIds } },
+    include: { courseType: true },
+  });
+
+  return courses.map((c) => ({
+    ...c,
+    enrollCount: topCourses.find((t) => t.courseId === c.id)?._count.courseId || 0,
+  })).sort((a, b) => b.enrollCount - a.enrollCount);
+}
+
 

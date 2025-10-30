@@ -66,4 +66,14 @@ export const deleteCourse = async (req: Request, res: Response) => {
   }
 }
 
+export const getTopEnrolledCourses = async (req: Request, res: Response) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 8;
+    const data = await courseService.getTopEnrolledCourses(limit);
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
