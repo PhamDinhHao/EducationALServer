@@ -87,4 +87,24 @@ export const getCoursesByCategoryId = async (req: Request, res: Response) => {
   }
 };
 
+export const queryCourses = async (req: Request, res: Response) => {
+  try {
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 12;
+    const sortBy = (req.query.sortBy as string) || 'createdAt';
+    const sortType = (req.query.sortType as 'asc' | 'desc') || 'desc';
+
+    const result = await courseService.queryCourses({
+      page,
+      limit,
+      sortBy,
+      sortType
+    });
+
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 

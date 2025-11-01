@@ -75,4 +75,37 @@ export const getCoursesByCategoryId = async (categoryId: number) => {
   })
 }
 
+export const queryCourses = async (options: {
+  limit?: number
+  page?: number
+  sortBy?: string
+  sortType?: 'asc' | 'desc'
+}) => {
+  const page = options.page ?? 1
+  const limit = options.limit ?? 12
+  const sortBy = options.sortBy ?? 'createdAt'
+  const sortType = options.sortType ?? 'desc'
+
+  const total = await prisma.course.count()
+
+  const courses = await prisma.course.findMany({
+    include: { courseType: true },
+    skip: (page - 1) * limit,
+    take: limit,
+    orderBy: { [sortBy]: sortType }
+  })
+
+  const totalPages = Math.ceil(total / limit)
+
+  return {
+    data: courses,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages
+    }
+  }
+}
+
 
