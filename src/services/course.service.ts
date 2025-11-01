@@ -67,4 +67,12 @@ export const getTopEnrolledCourses = async (limit: number = 8) => {
   })).sort((a, b) => b.enrollCount - a.enrollCount);
 }
 
+export const getCoursesByCategoryId = async (categoryId: number) => {
+  return prisma.course.findMany({
+    where: { courseTypeId: categoryId },
+    orderBy: { createdAt: 'desc' },
+    include: { courseType: true }
+  })
+}
+
 

@@ -76,4 +76,15 @@ export const getTopEnrolledCourses = async (req: Request, res: Response) => {
   }
 };
 
+export const getCoursesByCategoryId = async (req: Request, res: Response) => {
+  const categoryId = parseInt(req.params.categoryId);
+  if (isNaN(categoryId)) return res.status(400).json({ message: 'Category ID không hợp lệ' });
+  try {
+    const courses = await courseService.getCoursesByCategoryId(categoryId);
+    res.json(courses);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
