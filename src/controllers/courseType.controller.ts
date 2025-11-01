@@ -55,4 +55,14 @@ export const deleteCourseType = async (req: Request, res: Response) => {
   }
 }
 
+export const getTopCategories = async (req: Request, res: Response) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 8
+    const data = await courseTypeService.getTopCategories(limit)
+    res.json(data)
+  } catch (err: any) {
+    res.status(500).json({ message: err.message })
+  }
+}
+
 
