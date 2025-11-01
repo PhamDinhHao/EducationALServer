@@ -6,6 +6,8 @@ import catchAsync from '@utils/catchAsync'
 import { authService, userService, tokenService, emailService } from '@/services'
 import config from '@/configs/config'
 import { clearCookie, setCookie } from '@/utils/cookie'
+import { isPasswordMatch, encryptPassword } from '@utils/encryption'
+import ApiError from '@/utils/ApiError'
 const register = catchAsync(async (req, res) => {
   const { email, password } = req.body
   const user = await userService.createUser(email, password)
@@ -116,6 +118,59 @@ const revokeTokens = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send()
 })
 
+const updateMe = catchAsync(async (req, res) => {
+  const user = req.user as User
+
+  console.log('user,', user)
+  console.log('body', req.body);
+  const { name, email } = req.body
+  
+  // if (email && email !== user.email) {
+  //   const existingUser = await userService.getUserByEmail(email)
+  //   if (existingUser) {
+  //     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken')
+  //   }
+  // }
+
+  const updatedUser = await userService.updateUserById(user.id, { name, email }, ['id', 'email', 'name', 'role', 'isEmailVerified'])
+  const userWithoutPassword = _.omit(updatedUser, ['password', 'createdAt', 'updatedAt'])
+  
+  res.status(httpStatus.OK).send({
+    data: { user: userWithoutPassword },
+    success: true,
+    message: 'Profile updated successfully'
+  })
+})
+
+const changePassword = catchAsync(async (req, res) => {
+  const user = req.user as User
+  const { oldPassword, newPassword } = req.body
+
+  if (!oldPassword || !newPassword) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Old password and new password are required')
+  }
+
+  // Get user with password
+  const userWithPassword = await userService.getUserById(user.id, ['id', 'password'])
+  if (!userWithPassword) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
+  }
+
+  // Verify old password
+  if (!(await isPasswordMatch(oldPassword, userWithPassword.password as string))) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect old password')
+  }
+
+  // Update password
+  const encryptedPassword = await encryptPassword(newPassword)
+  await userService.updateUserById(user.id, { password: encryptedPassword })
+
+  res.status(httpStatus.OK).send({
+    success: true,
+    message: 'Password changed successfully'
+  })
+})
+
 export default {
   register,
   login,
@@ -126,5 +181,7 @@ export default {
   sendVerificationEmail,
   verifyEmail,
   getMe,
+  updateMe,
+  changePassword,
   revokeTokens
 }

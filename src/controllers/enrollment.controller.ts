@@ -34,4 +34,14 @@ export const listUserEnrollments = async (req: Request, res: Response) => {
   }
 }
 
+export const getMyEnrollments = async (req: Request, res: Response) => {
+  const user = req.user as { id: number }
+  try {
+    const items = await enrollmentService.listUserEnrollments(user.id)
+    res.json(items)
+  } catch (err: any) {
+    res.status(500).json({ message: err.message })
+  }
+}
+
 

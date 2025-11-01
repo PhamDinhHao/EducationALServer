@@ -17,5 +17,7 @@ router.post('/reset-password', validate(authValidation.resetPassword), authContr
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail)
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail)
 router.get('/me', auth(), authController.getMe)
+router.put('/me', auth(), authController.updateMe)
+router.put('/change-password', auth(), authController.changePassword)
 
 export default router
