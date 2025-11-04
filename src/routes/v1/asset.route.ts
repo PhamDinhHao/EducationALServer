@@ -7,6 +7,7 @@ import { assetController } from '@/controllers'
 const router = express.Router()
 
 router.route('/').get(auth(), assetController.getImages).post(auth(), upload.array('files'), assetController.uploadImage)
+router.get('/all', auth('manageUsers'), assetController.getAllAssets)
 router.route('/:id').delete(auth(), assetController.deleteImage)
 
 export default router

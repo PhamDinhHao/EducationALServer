@@ -49,13 +49,22 @@ const querySentences = async <Key extends keyof Sentence>(
 
   const sentences = await prisma.sentence.findMany({
     where: filter,
-    select: keys.reduce((obj, k) => ({ ...obj, [k]: true }), {}),
+    select: {
+      ...keys.reduce((obj, k) => ({ ...obj, [k]: true }), {}),
+      user: {
+        select: {
+          id: true,
+          email: true,
+          name: true
+        }
+      }
+    },
     skip: (page - 1) * limit,
     take: limit,
     orderBy: sortBy ? { [sortBy]: sortType } : undefined
   })
 
-  return { data: sentences as Pick<Sentence, Key>[], total }
+  return { data: sentences as any, total }
 }
 
 /**

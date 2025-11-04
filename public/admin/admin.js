@@ -290,7 +290,7 @@ function setupEventHandlers() {
   });
   
   $('#progressUserFilter').on('change', function() {
-    loadProgress();
+    loadProgressData($(this).val());
   });
   
   // Use event delegation for dynamically created buttons in tables
@@ -351,16 +351,6 @@ function setupEventHandlers() {
     viewProgressDetail(id);
   });
   
-  $(document).on('click', '.btn-view-template', function() {
-    const id = $(this).data('id');
-    viewTemplate(id);
-  });
-  
-  $(document).on('click', '.btn-delete-template', function() {
-    const id = $(this).data('id');
-    deleteTemplate(id);
-  });
-  
   $(document).on('click', '.btn-delete-asset', function() {
     const id = $(this).data('id');
     deleteAsset(id);
@@ -410,7 +400,6 @@ function showSection(section) {
     enrollments: 'Quản lý Đăng ký',
     comments: 'Quản lý Bình luận',
     progress: 'Quản lý Tiến độ',
-    templates: 'Quản lý Mẫu',
     assets: 'Quản lý Tài nguyên',
     sentences: 'Quản lý Câu'
   };
@@ -434,8 +423,6 @@ function showSection(section) {
       loadComments();
     } else if (section === 'progress') {
       loadProgress();
-    } else if (section === 'templates') {
-      loadTemplates();
     } else if (section === 'assets') {
       loadAssets();
     } else if (section === 'sentences') {
@@ -1401,29 +1388,40 @@ function deleteComment(id) {
 function loadProgress() {
   const userId = $('#progressUserFilter').val();
   
-  if (!userId) {
-    $('#progressTableBody').html('<tr><td colspan="7" class="text-center">Vui lòng chọn người dùng để xem tiến độ</td></tr>');
-    
-    // Load users for filter
-    if ($('#progressUserFilter option').length <= 1) {
-      $.ajax({
-        url: `${API_BASE_URL}/users`,
-        method: 'GET',
-        success: function(usersResponse) {
-          const users = extractData(usersResponse);
-          const usersArray = Array.isArray(users) ? users : [];
-          const select = $('#progressUserFilter');
-          select.empty().append('<option value="">Chọn người dùng</option>');
-          usersArray.forEach(user => {
-            select.append(`<option value="${user.id}">${user.email}${user.name ? ' (' + user.name + ')' : ''}</option>`);
-          });
-        }
-      });
-    }
-    return;
+  // Load users for filter
+  if ($('#progressUserFilter option').length <= 1) {
+    $.ajax({
+      url: `${API_BASE_URL}/users`,
+      method: 'GET',
+      success: function(usersResponse) {
+        const users = extractData(usersResponse);
+        const usersArray = Array.isArray(users) ? users : [];
+        const select = $('#progressUserFilter');
+        select.empty().append('<option value="">Tất cả</option>');
+        usersArray.forEach(user => {
+          select.append(`<option value="${user.id}">${user.email}${user.name ? ' (' + user.name + ')' : ''}</option>`);
+        });
+        // After loading users, load progress
+        loadProgressData(userId);
+      },
+      error: function() {
+        // Still try to load progress even if users fail
+        loadProgressData(userId);
+      }
+    });
+  } else {
+    loadProgressData(userId);
   }
-  
-  let url = `${API_BASE_URL}/progress/users/${userId}`;
+}
+
+function loadProgressData(userId) {
+  let url;
+  if (userId) {
+    url = `${API_BASE_URL}/progress/users/${userId}`;
+  } else {
+    // Load all progress
+    url = `${API_BASE_URL}/progress`;
+  }
   
   $.ajax({
     url: url,
@@ -1451,11 +1449,13 @@ function renderProgressTable(progress) {
   
   progress.forEach(item => {
     const progressPercent = item.progress || 0;
+    const lessonTitle = item.lesson?.title || item.lesson?.course?.title || item.lessonId || '-';
+    const userEmail = item.user?.email || item.userId || '-';
     const row = `
       <tr>
-        <td>${item.id}</td>
-        <td>${item.user?.email || item.userId || '-'}</td>
-        <td>${item.lesson?.title || item.lessonId || '-'}</td>
+        <td>${item.id || '-'}</td>
+        <td>${userEmail}</td>
+        <td>${lessonTitle}</td>
         <td>
           <div class="progress" style="height: 20px;">
             <div class="progress-bar" role="progressbar" style="width: ${progressPercent}%" aria-valuenow="${progressPercent}" aria-valuemin="0" aria-valuemax="100">
@@ -1466,7 +1466,7 @@ function renderProgressTable(progress) {
         <td>${item.completedAt ? formatDate(item.completedAt) : '-'}</td>
         <td>${item.lastViewedAt ? formatDate(item.lastViewedAt) : '-'}</td>
         <td>
-          <button class="btn btn-sm btn-info btn-view-progress" data-id="${item.id}" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
+          <button class="btn btn-sm btn-info btn-view-progress" data-id="${item.id || item.lessonId}" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
         </td>
       </tr>
     `;
@@ -1478,86 +1478,10 @@ function viewProgressDetail(id) {
   alert('Chi tiết tiến độ: ID ' + id);
 }
 
-// Templates Management
-function loadTemplates() {
-  $.ajax({
-    url: `${API_BASE_URL}/templates`,
-    method: 'GET',
-    success: function(response) {
-      const templates = extractData(response);
-      const templatesArray = Array.isArray(templates) ? templates : [];
-      renderTemplatesTable(templatesArray);
-    },
-    error: function(xhr) {
-      console.error('Error loading templates:', xhr);
-      $('#templatesTableBody').html('<tr><td colspan="6" class="text-center text-danger">Lỗi tải dữ liệu: ' + (xhr.responseJSON?.message || 'Không thể tải dữ liệu') + '</td></tr>');
-    }
-  });
-}
-
-function renderTemplatesTable(templates) {
-  const tbody = $('#templatesTableBody');
-  tbody.empty();
-  
-  if (templates.length === 0) {
-    tbody.append('<tr><td colspan="6" class="text-center">Không có dữ liệu</td></tr>');
-    return;
-  }
-  
-  templates.forEach(template => {
-    const row = `
-      <tr>
-        <td>${template.id}</td>
-        <td>${template.name}</td>
-        <td><span class="badge badge-${template.type === 'HTML' ? 'info' : 'secondary'}">${template.type}</span></td>
-        <td>${template.user?.email || template.userId || '-'}</td>
-        <td>${formatDate(template.createdAt)}</td>
-        <td>
-          <button class="btn btn-sm btn-info btn-view-template" data-id="${template.id}" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
-          <button class="btn btn-sm btn-danger btn-delete-template" data-id="${template.id}" title="Xóa"><i class="fas fa-trash"></i></button>
-        </td>
-      </tr>
-    `;
-    tbody.append(row);
-  });
-}
-
-function viewTemplate(id) {
-  $.ajax({
-    url: `${API_BASE_URL}/templates/${id}`,
-    method: 'GET',
-    success: function(response) {
-      const template = extractData(response);
-      const content = template.content || '';
-      const preview = content.length > 200 ? content.substring(0, 200) + '...' : content;
-      alert(`Template: ${template.name}\n\nLoại: ${template.type}\n\nNội dung:\n${preview}`);
-    },
-    error: function(xhr) {
-      alert('Lỗi tải template: ' + formatErrorMessage(xhr));
-    }
-  });
-}
-
-function deleteTemplate(id) {
-  if (confirm('Bạn có chắc chắn muốn xóa mẫu này?')) {
-    $.ajax({
-      url: `${API_BASE_URL}/templates/${id}`,
-      method: 'DELETE',
-      success: function() {
-        loadTemplates();
-        alert('Xóa thành công!');
-      },
-      error: function(xhr) {
-        alert(formatErrorMessage(xhr));
-      }
-    });
-  }
-}
-
 // Assets Management
 function loadAssets() {
   $.ajax({
-    url: `${API_BASE_URL}/assets`,
+    url: `${API_BASE_URL}/assets/all`,
     method: 'GET',
     success: function(response) {
       const assets = extractData(response);
@@ -1583,13 +1507,14 @@ function renderAssetsTable(assets) {
   assets.forEach(asset => {
     const src = asset.src || '';
     const srcPreview = src.length > 30 ? src.substring(0, 30) + '...' : src;
+    const userEmail = asset.user?.email || asset.userId || '-';
     const row = `
       <tr>
         <td>${asset.id}</td>
         <td>${asset.name}</td>
-        <td><span class="badge badge-${asset.type === 'IMAGE' ? 'info' : 'secondary'}">${asset.type}</span></td>
+        <td><span class="badge badge-${asset.type === 'IMAGE' ? 'info' : 'secondary'}">${asset.type || 'IMAGE'}</span></td>
         <td><a href="${src}" target="_blank" title="${src}">${srcPreview}</a></td>
-        <td>${asset.user?.email || asset.userId || '-'}</td>
+        <td>${userEmail}</td>
         <td>
           <button class="btn btn-sm btn-danger btn-delete-asset" data-id="${asset.id}" title="Xóa"><i class="fas fa-trash"></i></button>
         </td>
@@ -1621,9 +1546,15 @@ function loadSentences() {
     url: `${API_BASE_URL}/sentences`,
     method: 'GET',
     success: function(response) {
-      const sentences = extractData(response);
-      const sentencesArray = Array.isArray(sentences) ? sentences : [];
-      renderSentencesTable(sentencesArray);
+      // API returns {data: [...], total: number}
+      let sentences = [];
+      if (response.data) {
+        sentences = Array.isArray(response.data) ? response.data : [];
+      } else {
+        sentences = extractData(response);
+        sentences = Array.isArray(sentences) ? sentences : [];
+      }
+      renderSentencesTable(sentences);
     },
     error: function(xhr) {
       console.error('Error loading sentences:', xhr);

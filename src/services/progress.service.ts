@@ -31,4 +31,45 @@ export const listProgressByCourseForUser = async (userId: number, courseId: numb
     .map((l) => ({ lessonId: l.id, order: l.order, progress: map.get(l.id)?.progress ?? 0, completedAt: map.get(l.id)?.completedAt ?? null }))
 }
 
+export const getAllProgressForUser = async (userId: number) => {
+  return prisma.lessonProgress.findMany({
+    where: { userId },
+    include: {
+      lesson: {
+        include: {
+          course: true
+        }
+      },
+      user: {
+        select: {
+          id: true,
+          email: true,
+          name: true
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+}
+
+export const getAllProgress = async () => {
+  return prisma.lessonProgress.findMany({
+    include: {
+      lesson: {
+        include: {
+          course: true
+        }
+      },
+      user: {
+        select: {
+          id: true,
+          email: true,
+          name: true
+        }
+      }
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+}
+
 
