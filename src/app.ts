@@ -16,6 +16,7 @@ import { authLimiter } from '@middlewares/rateLimiter'
 
 import routes from '@routes/v1'
 import ApiError from '@utils/ApiError'
+import path from 'path'
 
 const app = express()
 
@@ -24,8 +25,43 @@ if (config.env !== 'test') {
   app.use(morgan.errorHandler)
 }
 
-// set security HTTP headers
-app.use(helmet())
+// set security HTTP headers with CSP configuration for admin dashboard
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "'unsafe-eval'",
+          'https://code.jquery.com',
+          'https://cdn.jsdelivr.net',
+          'https://cdnjs.cloudflare.com'
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          'https://cdn.jsdelivr.net',
+          'https://cdnjs.cloudflare.com',
+          'https://fonts.googleapis.com'
+        ],
+        fontSrc: [
+          "'self'",
+          'https://cdnjs.cloudflare.com',
+          'https://fonts.gstatic.com'
+        ],
+        imgSrc: ["'self'", 'data:', 'https:', 'http:'],
+        connectSrc: [
+          "'self'",
+          'https://cdn.jsdelivr.net',
+          'https://cdnjs.cloudflare.com'
+        ],
+        frameSrc: ["'self'"]
+      }
+    }
+  })
+)
 
 // parse json request body (increase limit for base64 images)
 app.use(express.json({ limit: '50mb' }))
@@ -68,6 +104,12 @@ passport.use('jwt', jwtStrategy)
 if (config.env === 'production') {
   app.use('/api/v1/auth', authLimiter)
 }
+
+// serve static files for admin dashboard
+app.use('/admin', express.static(path.join(__dirname, '../public/admin')))
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/admin/index.html'))
+})
 
 // v1 api routes
 app.use('/api/v1', routes)

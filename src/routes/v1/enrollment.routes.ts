@@ -4,6 +4,7 @@ import auth from '@/middlewares/auth'
 
 const router = Router()
 
+router.get('/', auth('manageUsers'), enrollmentController.listAllEnrollments)
 router.post('/', enrollmentController.enroll)
 router.delete('/', enrollmentController.unenroll)
 router.get('/me', auth(), enrollmentController.getMyEnrollments)

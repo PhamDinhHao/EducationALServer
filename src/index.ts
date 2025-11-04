@@ -3,13 +3,18 @@ import app from './app'
 import prisma from './client'
 import config from '@configs/config'
 import logger from '@configs/logger'
+import { initializeDefaultAdmin } from '@utils/initAdmin'
 
 let server: Server
 
 const PORT = process.env.PORT || config.port || 3000
 
-prisma.$connect().then(() => {
+prisma.$connect().then(async () => {
   logger.info('Connected to SQL Database')
+  
+  // Initialize default admin user if no admin exists
+  await initializeDefaultAdmin()
+  
   server = app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`)
   })

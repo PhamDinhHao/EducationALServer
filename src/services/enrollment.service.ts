@@ -17,7 +17,23 @@ export const unenroll = async (userId: number, courseId: number) => {
 export const listUserEnrollments = async (userId: number) => {
   return prisma.courseEnrollment.findMany({
     where: { userId },
-    include: { course: true },
+    include: { course: true, user: true },
+    orderBy: { enrolledAt: 'desc' }
+  })
+}
+
+export const getAllEnrollments = async () => {
+  return prisma.courseEnrollment.findMany({
+    include: { 
+      course: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          name: true
+        }
+      }
+    },
     orderBy: { enrolledAt: 'desc' }
   })
 }

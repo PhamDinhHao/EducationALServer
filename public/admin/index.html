@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Education AL Server</title>
+  
+  <!-- AdminLTE CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  
+  <style>
+    .content-header {
+      padding: 15px 0.5rem;
+    }
+    .table-responsive {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .modal-dialog {
+      max-width: 90%;
+    }
+    .form-group label {
+      font-weight: 600;
+    }
+    .badge-status {
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    .stat-card {
+      border-left: 4px solid #007bff;
+    }
+    .stat-card.success {
+      border-left-color: #28a745;
+    }
+    .stat-card.warning {
+      border-left-color: #ffc107;
+    }
+    .stat-card.danger {
+      border-left-color: #dc3545;
+    }
+  </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+  <div class="wrapper">
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="logoutBtn">
+            <i class="fas fa-sign-out-alt"></i> Đăng xuất
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Sidebar -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+      <a href="#" class="brand-link">
+        <span class="brand-text font-weight-light">Admin Dashboard</span>
+      </a>
+      <div class="sidebar">
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+            <li class="nav-item">
+              <a href="#" class="nav-link active" data-section="dashboard">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>Dashboard</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="users">
+                <i class="nav-icon fas fa-users"></i>
+                <p>Người dùng</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="courses">
+                <i class="nav-icon fas fa-book"></i>
+                <p>Khóa học</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="course-types">
+                <i class="nav-icon fas fa-tags"></i>
+                <p>Loại khóa học</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="lessons">
+                <i class="nav-icon fas fa-chalkboard-teacher"></i>
+                <p>Bài học</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="enrollments">
+                <i class="nav-icon fas fa-user-graduate"></i>
+                <p>Đăng ký</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="comments">
+                <i class="nav-icon fas fa-comments"></i>
+                <p>Bình luận</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="progress">
+                <i class="nav-icon fas fa-chart-line"></i>
+                <p>Tiến độ</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="templates">
+                <i class="nav-icon fas fa-file-alt"></i>
+                <p>Mẫu</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="assets">
+                <i class="nav-icon fas fa-images"></i>
+                <p>Tài nguyên</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="sentences">
+                <i class="nav-icon fas fa-quote-left"></i>
+                <p>Câu</p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+      <!-- Content Header -->
+      <div class="content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1 class="m-0" id="pageTitle">Dashboard</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <section class="content">
+        <div class="container-fluid">
+          <!-- Dashboard Section -->
+          <div id="dashboard-section" class="content-section">
+            <div class="row">
+              <div class="col-lg-3 col-6">
+                <div class="small-box bg-info stat-card">
+                  <div class="inner">
+                    <h3 id="stat-users">0</h3>
+                    <p>Người dùng</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-users"></i>
+                  </div>
+                  <a href="#" class="small-box-footer" data-section="users">
+                    Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6">
+                <div class="small-box bg-success stat-card success">
+                  <div class="inner">
+                    <h3 id="stat-courses">0</h3>
+                    <p>Khóa học</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-book"></i>
+                  </div>
+                  <a href="#" class="small-box-footer" data-section="courses">
+                    Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning stat-card warning">
+                  <div class="inner">
+                    <h3 id="stat-enrollments">0</h3>
+                    <p>Đăng ký</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-user-graduate"></i>
+                  </div>
+                  <a href="#" class="small-box-footer" data-section="enrollments">
+                    Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger stat-card danger">
+                  <div class="inner">
+                    <h3 id="stat-comments">0</h3>
+                    <p>Bình luận</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-comments"></i>
+                  </div>
+                  <a href="#" class="small-box-footer" data-section="comments">
+                    Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Users Section -->
+          <div id="users-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Người dùng</h3>
+                <button class="btn btn-primary btn-sm float-right" id="btnAddUser">
+                  <i class="fas fa-plus"></i> Thêm mới
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="usersTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Tên</th>
+                        <th>Vai trò</th>
+                        <th>Email đã xác thực</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="usersTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Courses Section -->
+          <div id="courses-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Khóa học</h3>
+                <button class="btn btn-primary btn-sm float-right" id="btnAddCourse">
+                  <i class="fas fa-plus"></i> Thêm mới
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="coursesTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Giáo viên</th>
+                        <th>Học viên</th>
+                        <th>Loại khóa học</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="coursesTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Course Types Section -->
+          <div id="course-types-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Loại Khóa học</h3>
+                <button class="btn btn-primary btn-sm float-right" id="btnAddCourseType">
+                  <i class="fas fa-plus"></i> Thêm mới
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="courseTypesTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Mô tả</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="courseTypesTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lessons Section -->
+          <div id="lessons-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Bài học</h3>
+                <button class="btn btn-primary btn-sm float-right" id="btnAddLesson">
+                  <i class="fas fa-plus"></i> Thêm mới
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label>Lọc theo khóa học:</label>
+                  <select class="form-control" id="lessonCourseFilter">
+                    <option value="">Tất cả</option>
+                  </select>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="lessonsTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Khóa học</th>
+                        <th>Thời lượng (phút)</th>
+                        <th>Thứ tự</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="lessonsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enrollments Section -->
+          <div id="enrollments-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Đăng ký</h3>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="enrollmentsTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Người dùng</th>
+                        <th>Khóa học</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đăng ký</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="enrollmentsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div id="comments-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Bình luận</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label>Lọc theo bài học:</label>
+                  <select class="form-control" id="commentLessonFilter">
+                    <option value="">Tất cả</option>
+                  </select>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="commentsTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Nội dung</th>
+                        <th>Tác giả</th>
+                        <th>Bài học</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="commentsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Section -->
+          <div id="progress-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Tiến độ</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label>Lọc theo người dùng:</label>
+                  <select class="form-control" id="progressUserFilter">
+                    <option value="">Tất cả</option>
+                  </select>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="progressTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Người dùng</th>
+                        <th>Bài học</th>
+                        <th>Tiến độ (%)</th>
+                        <th>Hoàn thành</th>
+                        <th>Xem lần cuối</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="progressTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Templates Section -->
+          <div id="templates-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Mẫu</h3>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="templatesTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Loại</th>
+                        <th>Người dùng</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="templatesTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assets Section -->
+          <div id="assets-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Tài nguyên</h3>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="assetsTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Loại</th>
+                        <th>URL</th>
+                        <th>Người dùng</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="assetsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sentences Section -->
+          <div id="sentences-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Câu</h3>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="sentencesTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Nội dung</th>
+                        <th>Người dùng</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="sentencesTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+      <strong>Copyright &copy; 2025 Education AL Server Admin Dashboard.</strong>
+    </footer>
+  </div>
+
+  <!-- Modals will be inserted here dynamically -->
+  <div id="modalContainer"></div>
+
+  <!-- Login Modal -->
+  <div class="modal fade" id="loginModal" tabindex="-1" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Đăng nhập Admin</h5>
+        </div>
+        <div class="modal-body">
+          <form id="loginForm">
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" class="form-control" id="loginEmail" required autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label>Mật khẩu *</label>
+              <input type="password" class="form-control" id="loginPassword" required autocomplete="current-password">
+            </div>
+          </form>
+          <div class="alert alert-info mt-3">
+            <small><i class="fas fa-info-circle"></i> Vui lòng đăng nhập bằng tài khoản có vai trò ADMIN</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="btnLogin">
+            <i class="fas fa-sign-in-alt"></i> Đăng nhập
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- AdminLTE -->
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  <!-- Custom JS -->
+  <script src="admin.js"></script>
+</body>
+</html>
+

@@ -44,4 +44,13 @@ export const getMyEnrollments = async (req: Request, res: Response) => {
   }
 }
 
+export const listAllEnrollments = async (_req: Request, res: Response) => {
+  try {
+    const enrollments = await enrollmentService.getAllEnrollments()
+    res.json(enrollments)
+  } catch (err: any) {
+    res.status(500).json({ message: err.message })
+  }
+}
+
 

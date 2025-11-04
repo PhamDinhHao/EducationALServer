@@ -1,6 +1,15 @@
 import { Request, Response } from 'express'
 import * as lessonService from '../services/lesson.service'
 
+export const listAllLessons = async (_req: Request, res: Response) => {
+  try {
+    const lessons = await lessonService.getAllLessons()
+    res.json(lessons)
+  } catch (err: any) {
+    res.status(500).json({ message: err.message })
+  }
+}
+
 export const getLessonsByCourse = async (req: Request, res: Response) => {
   const courseId = parseInt(req.params.id)
   if (isNaN(courseId)) return res.status(400).json({ message: 'ID không hợp lệ' })
