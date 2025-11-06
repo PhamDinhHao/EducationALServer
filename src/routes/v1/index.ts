@@ -16,7 +16,9 @@ import courseRoute from './course.routes'
 import courseTypeRoute from './courseType.routes'
 import enrollmentRoute from './enrollment.routes'
 import progressRoute from './progress.routes'
-
+import blogRoute from './blog.route'
+import blogCommentRoute from './blogComment.route'
+import blogTagRoute from './blogTag.route'
 const router = express.Router()
 
 router.get('/test', (req, res) => {
@@ -63,6 +65,9 @@ const defaultRoutes = [
   { path: '/course-types', route: courseTypeRoute },
   { path: '/enrollments', route: enrollmentRoute },
   { path: '/progress', route: progressRoute },
+  { path: '/blogs', route: blogRoute },
+  { path: '/blog-comments', route: blogCommentRoute },
+  { path: '/blog-tags', route: blogTagRoute }
 ]
 
 defaultRoutes.forEach((route) => {

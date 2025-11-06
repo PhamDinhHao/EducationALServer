@@ -64,6 +64,8 @@ model User {
   Comment          Comment[]
   CourseEnrollment CourseEnrollment[]
   LessonProgress   LessonProgress[]
+  Blog             Blog[]
+  BlogComment      BlogComment[]
 
   @@map("users")
 }
@@ -223,3 +225,52 @@ model LessonProgress {
   @@index([lessonId], map: "lesson_progress_lesson_id_fkey")
   @@map("lesson_progress")
 }
+
+model Blog {
+  id          Int           @id @default(autoincrement())
+  userId      Int           @map("user_id")
+  title       String
+  content     String         @db.Text
+  image       String?
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  user        User           @relation(fields: [userId], references: [id])
+  tags        BlogTag[]      @relation("BlogToTags")
+  comments    BlogComment[]  @relation("BlogToComments")
+
+  @@index([userId], map: "blogs_user_id_fkey")
+  @@map("blogs")
+}
+
+model BlogTag {
+  id        Int      @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  blogs     Blog[]    @relation("BlogToTags")
+
+  @@map("blog_tags")
+}
+
+model BlogComment {
+  id        Int           @id @default(autoincrement())
+  blogId    Int            @map("blog_id")
+  userId    Int?           @map("user_id")
+  parentId  Int?           @map("parent_id")
+  content   String          @db.Text
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  blog      Blog            @relation("BlogToComments", fields: [blogId], references: [id])
+  user      User?           @relation(fields: [userId], references: [id])
+  parent    BlogComment?    @relation("BlogCommentToReplies", fields: [parentId], references: [id])
+  replies   BlogComment[]   @relation("BlogCommentToReplies")
+
+  @@index([blogId], map: "blog_comments_blog_id_fkey")
+  @@index([userId], map: "blog_comments_user_id_fkey")
+  @@index([parentId], map: "blog_comments_parent_id_fkey")
+  @@map("blog_comments")
+}
+
