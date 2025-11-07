@@ -1,11 +1,46 @@
 import { Request, Response } from 'express'
 import * as blogService from '@/services/blog.service'
 import { User } from '@prisma/client'
+import _ from 'lodash'
+import catchAsync from '@/utils/catchAsync'
 
-export const listAllBlogs = async (_req: Request, res: Response) => {
+export const getRelatedBlogs = async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id)
+  const relatedBlogs = await blogService.getRelatedBlogs(id)
+  res.json(relatedBlogs)
+}
+
+export const getRecentBlogs = async (req: Request, res: Response) => {
+  console.log('getRecentBlogs')
+  const recentBlogs = await blogService.getRecentBlogs()
+  res.json(recentBlogs)
+}
+
+export const listAllBlogs = async (req: Request, res: Response) => {
   try {
-    const blogs = await blogService.getAllBlogs()
-    res.json(blogs)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query: any = req.query
+
+    let sortBy = query.sortBy ?? 'createdAt'
+    let sortType: 'asc' | 'desc' = 'desc'
+
+    if (typeof sortBy === 'string' && sortBy.includes(':')) {
+      const [field, direction] = sortBy.split(':')
+      sortBy = field
+      sortType = direction === 'asc' ? 'asc' : 'desc'
+    }
+
+    const options = {
+      sortBy,
+      sortType,
+      limit: Number(query.limit ?? 12),
+      page: Number(query.page ?? 1)
+    }
+
+    const filter = _.pick(query, ['title', 'tags', 'userId', 'createdAt'])
+
+    const result = await blogService.queryBlogs(options, filter)
+    res.json(result)
   } catch (err: unknown) {
     if (err instanceof Error) {
       res.status(500).json({ message: err.message })
@@ -30,14 +65,24 @@ export const getBlogById = async (req: Request, res: Response) => {
   }
 }
 
-export const createBlog = async (req: Request, res: Response) => {
-  const { title, content, image } = req.body
+export const createBlog = catchAsync(async (req, res) => {
+  const user = req.user as User
+
+  const { title, content, tags } = req.body
+  const image = req.file ? `/uploads/${req.file.filename}` : null
+
   if (!title || !content) {
     return res.status(400).json({ message: 'Thiếu dữ liệu bắt buộc' })
   }
+
   try {
-    const user = req.user as User
-    const created = await blogService.createBlog(user.id, { userId: user.id, title, content, image })
+    const created = await blogService.createBlog(user.id, {
+      title,
+      content,
+      image,
+      tags
+    })
+
     res.status(201).json(created)
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -46,7 +91,7 @@ export const createBlog = async (req: Request, res: Response) => {
       res.status(500).json({ message: 'Lỗi không xác định' })
     }
   }
-}
+})
 
 export const updateBlog = async (req: Request, res: Response) => {
   const id = parseInt(req.params.id)

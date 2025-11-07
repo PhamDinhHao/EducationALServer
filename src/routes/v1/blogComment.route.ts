@@ -3,7 +3,7 @@ import * as blogCommentController from '@/controllers/blogComment.controller'
 
 const router = express.Router()
 
-router.get('/blogs/:blogId/comments', blogCommentController.getBlogComments)
+router.get('/blogs/:blogId/comments', blogCommentController.listAllBlogComments)
 router.post('/blogs/:blogId/comments', blogCommentController.postBlogComment)
 
 export default router

@@ -4,12 +4,38 @@ import * as blogCommentService from '@/services/blogComment.service'
 /**
  * Lấy comment cha + con cho 1 lesson
  */
-export const getBlogComments = async (req: Request, res: Response) => {
-  const blogId = parseInt(req.params.blogId)
-  if (isNaN(blogId)) return res.status(400).json({ message: 'ID không hợp lệ' })
-
+export const listAllBlogComments = async (req: Request, res: Response) => {
   try {
-    const comments = await blogCommentService.getBlogCommentsByBlog(blogId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query: any = req.query
+    const blogId = parseInt(req.params.blogId)
+
+    let sortBy = query.sortBy ?? 'createdAt'
+    let sortType: 'asc' | 'desc' = 'desc'
+
+    if (typeof sortBy === 'string' && sortBy.includes(':')) {
+      const [field, direction] = sortBy.split(':')
+      sortBy = field
+      sortType = direction === 'asc' ? 'asc' : 'desc'
+    }
+
+    const options = {
+      sortBy,
+      sortType,
+      limit: Number(query.limit ?? 12),
+      page: Number(query.page ?? 1)
+    }
+
+    const filter = {
+      blogId,
+      userId: parseInt(query.userId ?? '0'),
+      parentId: parseInt(query.parentId ?? '0'),
+      createdAt: new Date(query.createdAt ?? new Date())
+    }
+    if (isNaN(filter.blogId)) {
+      return res.status(400).json({ message: 'ID không hợp lệ' })
+    }
+    const comments = await blogCommentService.queryBlogComments(options, filter)
     res.json(comments)
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -21,8 +47,6 @@ export const getBlogComments = async (req: Request, res: Response) => {
 }
 
 /**
- * Tạo comment cha hoặc reply (2 cấp)
- * Nếu req.body.parentId có giá trị → là reply
  */
 export const postBlogComment = async (req: Request, res: Response) => {
   const blogId = parseInt(req.params.blogId)
@@ -35,10 +59,8 @@ export const postBlogComment = async (req: Request, res: Response) => {
   try {
     let comment
     if (parentId) {
-      // tạo reply
       comment = await blogCommentService.createBlogCommentReply(blogId, parentId, userId, content)
     } else {
-      // tạo comment cha
       comment = await blogCommentService.createBlogComment(blogId, userId, content)
     }
 

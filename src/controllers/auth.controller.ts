@@ -105,6 +105,7 @@ const verifyEmail = catchAsync(async (req, res) => {
 
 const getMe = catchAsync(async (req, res) => {
   const user = req.user as User
+  console.log('user:', user)
   res.status(httpStatus.OK).send({
     data: { user },
     success: true,
