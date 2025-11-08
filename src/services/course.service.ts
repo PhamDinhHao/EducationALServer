@@ -1,17 +1,40 @@
 import prisma from '@/client'
 
 export const listCourses = async () => {
-  return prisma.course.findMany({
+  const courses = await prisma.course.findMany({
     orderBy: { createdAt: 'desc' },
     include: { courseType: true }
   })
+
+  const enrollmentCounts = await prisma.courseEnrollment.groupBy({
+    by: ['courseId'],
+    _count: { courseId: true },
+  })
+
+  return courses.map((course) => ({
+    ...course,
+    enrollCount: enrollmentCounts.find((ec) => ec.courseId === course.id)?._count.courseId || 0,
+    students: enrollmentCounts.find((ec) => ec.courseId === course.id)?._count.courseId || course.students || 0,
+  }))
 }
 
 export const getCourseById = async (id: number) => {
-  return prisma.course.findUnique({
+  const course = await prisma.course.findUnique({
     where: { id },
     include: { courseType: true, lessons: { orderBy: { order: 'asc' } } }
   })
+
+  if (!course) return null
+
+  const enrollmentCount = await prisma.courseEnrollment.count({
+    where: { courseId: id }
+  })
+
+  return {
+    ...course,
+    enrollCount: enrollmentCount,
+    students: enrollmentCount || course.students || 0,
+  }
 }
 
 export const createCourse = async (input: {
@@ -68,11 +91,24 @@ export const getTopEnrolledCourses = async (limit: number = 8) => {
 }
 
 export const getCoursesByCategoryId = async (categoryId: number) => {
-  return prisma.course.findMany({
+  const courses = await prisma.course.findMany({
     where: { courseTypeId: categoryId },
     orderBy: { createdAt: 'desc' },
     include: { courseType: true }
   })
+
+  // Get enrollment counts for all courses
+  const enrollmentCounts = await prisma.courseEnrollment.groupBy({
+    by: ['courseId'],
+    _count: { courseId: true },
+  })
+
+  // Map enrollment counts to courses
+  return courses.map((course) => ({
+    ...course,
+    enrollCount: enrollmentCounts.find((ec) => ec.courseId === course.id)?._count.courseId || 0,
+    students: enrollmentCounts.find((ec) => ec.courseId === course.id)?._count.courseId || course.students || 0,
+  }))
 }
 
 export const queryCourses = async (options: {
@@ -95,10 +131,25 @@ export const queryCourses = async (options: {
     orderBy: { [sortBy]: sortType }
   })
 
+  // Get enrollment counts for all courses in this page
+  const courseIds = courses.map((c) => c.id)
+  const enrollmentCounts = await prisma.courseEnrollment.groupBy({
+    by: ['courseId'],
+    _count: { courseId: true },
+    where: { courseId: { in: courseIds } }
+  })
+
+  // Map enrollment counts to courses
+  const coursesWithEnrollCount = courses.map((course) => ({
+    ...course,
+    enrollCount: enrollmentCounts.find((ec) => ec.courseId === course.id)?._count.courseId || 0,
+    students: enrollmentCounts.find((ec) => ec.courseId === course.id)?._count.courseId || course.students || 0,
+  }))
+
   const totalPages = Math.ceil(total / limit)
 
   return {
-    data: courses,
+    data: coursesWithEnrollCount,
     pagination: {
       total,
       page,
