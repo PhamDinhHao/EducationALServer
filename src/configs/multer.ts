@@ -11,14 +11,24 @@ if (!fs.existsSync(uploadDir)) {
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // This part defines where the files need to be saved
     cb(null, 'tmp/uploads')
   },
   filename: (req, file, cb) => {
-    // This part sets the file name of the file
-    cb(null, file.originalname)
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
   }
 })
 
-// Then we will set the storage
-export const upload = multer({ storage: storage })
+const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true)
+  } else {
+    cb(new Error('Chỉ được upload file ảnh!'), false)
+  }
+}
+
+export const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }
+})

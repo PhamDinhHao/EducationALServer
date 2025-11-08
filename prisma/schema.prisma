@@ -53,6 +53,7 @@ model User {
   email            String             @unique
   name             String?
   password         String
+  avatar           String?            @db.Text
   role             Role               @default(USER)
   isEmailVerified  Boolean            @default(false) @map("is_email_verified")
   createdAt        DateTime           @default(now()) @map("created_at")

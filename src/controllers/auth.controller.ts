@@ -8,6 +8,9 @@ import config from '@/configs/config'
 import { clearCookie, setCookie } from '@/utils/cookie'
 import { isPasswordMatch, encryptPassword } from '@utils/encryption'
 import ApiError from '@/utils/ApiError'
+import prisma from '@/client'
+import uploadService from '@/services/upload.service'
+
 const register = catchAsync(async (req, res) => {
   const { email, password } = req.body
   const user = await userService.createUser(email, password)
@@ -105,9 +108,17 @@ const verifyEmail = catchAsync(async (req, res) => {
 
 const getMe = catchAsync(async (req, res) => {
   const user = req.user as User
-  console.log('user:', user)
+  const userWithAvatar = await (prisma.user.findUnique as any)({
+    where: { id: user.id },
+    select: { id: true, email: true, name: true, avatar: true, role: true, isEmailVerified: true }
+  })
+  console.log('user:', userWithAvatar)
+  if (!userWithAvatar) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
+  }
+  const userWithoutPassword = _.omit(userWithAvatar, ['createdAt', 'updatedAt'])
   res.status(httpStatus.OK).send({
-    data: { user },
+    data: { user: userWithoutPassword },
     success: true,
     message: 'User details fetched successfully'
   })
@@ -124,22 +135,47 @@ const updateMe = catchAsync(async (req, res) => {
 
   console.log('user,', user)
   console.log('body', req.body);
-  const { name, email } = req.body
+  const { name, email, avatar } = req.body
   
-  // if (email && email !== user.email) {
-  //   const existingUser = await userService.getUserByEmail(email)
-  //   if (existingUser) {
-  //     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken')
-  //   }
-  // }
-
-  const updatedUser = await userService.updateUserById(user.id, { name, email }, ['id', 'email', 'name', 'role', 'isEmailVerified'])
+  const updatedUser = await (prisma.user.update as any)({
+    where: { id: user.id },
+    data: { name, email, avatar },
+    select: { id: true, email: true, name: true, avatar: true, role: true, isEmailVerified: true }
+  })
   const userWithoutPassword = _.omit(updatedUser, ['password', 'createdAt', 'updatedAt'])
   
   res.status(httpStatus.OK).send({
     data: { user: userWithoutPassword },
     success: true,
     message: 'Profile updated successfully'
+  })
+})
+
+const uploadAvatar = catchAsync(async (req, res) => {
+  const user = req.user as User
+  const file = req.file
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'No file provided')
+  }
+
+  const avatarUrl = await uploadService.uploadImage('avatars', file.path)
+  
+  if (!avatarUrl) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to upload avatar')
+  }
+
+  const updatedUser = await (prisma.user.update as any)({
+    where: { id: user.id },
+    data: { avatar: avatarUrl },
+    select: { id: true, email: true, name: true, avatar: true, role: true, isEmailVerified: true }
+  })
+  const userWithoutPassword = _.omit(updatedUser, ['createdAt', 'updatedAt'])
+  
+  res.status(httpStatus.OK).send({
+    data: { user: userWithoutPassword },
+    success: true,
+    message: 'Avatar uploaded successfully'
   })
 })
 
@@ -151,18 +187,15 @@ const changePassword = catchAsync(async (req, res) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Old password and new password are required')
   }
 
-  // Get user with password
   const userWithPassword = await userService.getUserById(user.id, ['id', 'password'])
   if (!userWithPassword) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
   }
 
-  // Verify old password
   if (!(await isPasswordMatch(oldPassword, userWithPassword.password as string))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect old password')
   }
 
-  // Update password
   const encryptedPassword = await encryptPassword(newPassword)
   await userService.updateUserById(user.id, { password: encryptedPassword })
 
@@ -184,5 +217,6 @@ export default {
   getMe,
   updateMe,
   changePassword,
-  revokeTokens
+  revokeTokens,
+  uploadAvatar
 }
