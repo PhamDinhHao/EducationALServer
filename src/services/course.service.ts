@@ -116,15 +116,35 @@ export const queryCourses = async (options: {
   page?: number
   sortBy?: string
   sortType?: 'asc' | 'desc'
+  search?: string
+  courseTypeId?: number
 }) => {
   const page = options.page ?? 1
   const limit = options.limit ?? 12
   const sortBy = options.sortBy ?? 'createdAt'
   const sortType = options.sortType ?? 'desc'
+  const search = options.search?.trim()
+  const courseTypeId = options.courseTypeId
 
-  const total = await prisma.course.count()
+
+  const where: any = {}
+  
+  if (search) {
+    where.OR = [
+      { title: { contains: search } },
+      { description: { contains: search } },
+      { teacher: { contains: search } }
+    ]
+  }
+
+  if (courseTypeId) {
+    where.courseTypeId = courseTypeId
+  }
+
+  const total = await prisma.course.count({ where })
 
   const courses = await prisma.course.findMany({
+    where,
     include: { courseType: true },
     skip: (page - 1) * limit,
     take: limit,

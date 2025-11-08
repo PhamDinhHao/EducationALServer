@@ -97,12 +97,20 @@ export const queryCourses = async (req: Request, res: Response) => {
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 12;
     const sortBy = (req.query.sortBy as string) || 'createdAt';
     const sortType = (req.query.sortType as 'asc' | 'desc') || 'desc';
+    const search = req.query.search as string | undefined;
+    const courseTypeId = req.query.course_type_id 
+      ? parseInt(req.query.course_type_id as string) 
+      : req.query.courseTypeId 
+        ? parseInt(req.query.courseTypeId as string) 
+        : undefined;
 
     const result = await courseService.queryCourses({
       page,
       limit,
       sortBy,
-      sortType
+      sortType,
+      search,
+      courseTypeId
     });
 
     res.json(result);
