@@ -1390,13 +1390,26 @@ function deleteEnrollment(id, userId, courseId) {
 
 // Comments Management
 function loadComments(updateStats = false) {
+  if (updateStats) {
+    return $.ajax({
+      url: `${API_BASE_URL}/comment/count`,
+      method: 'GET',
+      success: function(response) {
+        const count = response.count || response.data?.count || 0;
+        $('#stat-comments').text(count);
+      },
+      error: function(xhr) {
+        console.error('Error loading comment count:', xhr);
+        $('#stat-comments').text('0');
+      }
+    });
+  }
+  
   const lessonId = $('#commentLessonFilter').val();
   
-  // If no lesson selected, we can't load comments without a lesson ID
-  if (!lessonId && !updateStats) {
+  if (!lessonId) {
     $('#commentsTableBody').html('<tr><td colspan="6" class="text-center">Vui lòng chọn bài học để xem bình luận</td></tr>');
     
-    // Load lessons for filter
     if ($('#commentLessonFilter option').length <= 1) {
       loadLessonsForCommentFilter();
     }
@@ -1411,18 +1424,11 @@ function loadComments(updateStats = false) {
     success: function(response) {
       const comments = extractData(response);
       const commentsArray = Array.isArray(comments) ? comments : [];
-      
-      if (updateStats) {
-        $('#stat-comments').text(commentsArray.length);
-      } else {
-        renderCommentsTable(commentsArray);
-      }
+      renderCommentsTable(commentsArray);
     },
     error: function(xhr) {
       console.error('Error loading comments:', xhr);
-      if (!updateStats) {
-        $('#commentsTableBody').html('<tr><td colspan="6" class="text-center text-danger">Lỗi tải dữ liệu: ' + (xhr.responseJSON?.message || 'Không thể tải dữ liệu') + '</td></tr>');
-      }
+      $('#commentsTableBody').html('<tr><td colspan="6" class="text-center text-danger">Lỗi tải dữ liệu: ' + (xhr.responseJSON?.message || 'Không thể tải dữ liệu') + '</td></tr>');
     }
   });
 }

@@ -15,26 +15,49 @@ export const getCommentsByLesson = async (lessonId: number) => {
   });
 };
 
-/**
- * Tạo comment cha
- */
+
+export const getAllComments = async () => {
+  return prisma.comment.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      lesson: {
+        select: {
+          id: true,
+          title: true,
+          courseId: true
+        }
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true
+        }
+      }
+    }
+  });
+};
+
+
+export const getCommentCount = async () => {
+  return prisma.comment.count();
+};
+
+
 export const createComment = async (lessonId: number, author: string, content: string) => {
   return prisma.comment.create({
     data: {
       lessonId,
       author,
       content,
-      parentId: null // comment cha
+      parentId: null
     },
   });
 };
 
-/**
- * Tạo reply (comment con)
- */
 export const createReply = async (
   lessonId: number,
-  parentId: number, // id của comment cha
+  parentId: number,
   author: string,
   content: string
 ) => {
@@ -43,7 +66,7 @@ export const createReply = async (
       lessonId,
       author,
       content,
-      parentId, // gán parentId = comment cha
+      parentId,
     },
   });
 };
