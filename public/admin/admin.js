@@ -355,16 +355,6 @@ function setupEventHandlers() {
     const id = $(this).data('id');
     deleteAsset(id);
   });
-  
-  $(document).on('click', '.btn-view-sentence', function() {
-    const id = $(this).data('id');
-    viewSentence(id);
-  });
-  
-  $(document).on('click', '.btn-delete-sentence', function() {
-    const id = $(this).data('id');
-    deleteSentence(id);
-  });
 }
 
 // Navigation
@@ -400,8 +390,7 @@ function showSection(section) {
     enrollments: 'Quản lý Đăng ký',
     comments: 'Quản lý Bình luận',
     progress: 'Quản lý Tiến độ',
-    assets: 'Quản lý Tài nguyên',
-    sentences: 'Quản lý Câu'
+    assets: 'Quản lý Tài nguyên'
   };
   $('#pageTitle').text(titles[section] || 'Admin');
   
@@ -425,8 +414,6 @@ function showSection(section) {
       loadProgress();
     } else if (section === 'assets') {
       loadAssets();
-    } else if (section === 'sentences') {
-      loadSentences();
     }
   }, 100);
 }
@@ -1645,88 +1632,6 @@ function deleteAsset(id) {
       method: 'DELETE',
       success: function() {
         loadAssets();
-        alert('Xóa thành công!');
-      },
-      error: function(xhr) {
-        alert(formatErrorMessage(xhr));
-      }
-    });
-  }
-}
-
-// Sentences Management
-function loadSentences() {
-  $.ajax({
-    url: `${API_BASE_URL}/sentences`,
-    method: 'GET',
-    success: function(response) {
-      // API returns {data: [...], total: number}
-      let sentences = [];
-      if (response.data) {
-        sentences = Array.isArray(response.data) ? response.data : [];
-      } else {
-        sentences = extractData(response);
-        sentences = Array.isArray(sentences) ? sentences : [];
-      }
-      renderSentencesTable(sentences);
-    },
-    error: function(xhr) {
-      console.error('Error loading sentences:', xhr);
-      $('#sentencesTableBody').html('<tr><td colspan="6" class="text-center text-danger">Lỗi tải dữ liệu: ' + (xhr.responseJSON?.message || 'Không thể tải dữ liệu') + '</td></tr>');
-    }
-  });
-}
-
-function renderSentencesTable(sentences) {
-  const tbody = $('#sentencesTableBody');
-  tbody.empty();
-  
-  if (sentences.length === 0) {
-    tbody.append('<tr><td colspan="6" class="text-center">Không có dữ liệu</td></tr>');
-    return;
-  }
-  
-  sentences.forEach(sentence => {
-    const content = sentence.content || '';
-    const preview = content.length > 50 ? content.substring(0, 50) + '...' : content;
-    const row = `
-      <tr>
-        <td>${sentence.id}</td>
-        <td>${sentence.name}</td>
-        <td>${preview}</td>
-        <td>${sentence.user?.email || sentence.userId || '-'}</td>
-        <td>${formatDate(sentence.createdAt)}</td>
-        <td>
-          <button class="btn btn-sm btn-info btn-view-sentence" data-id="${sentence.id}" title="Xem chi tiết"><i class="fas fa-eye"></i></button>
-          <button class="btn btn-sm btn-danger btn-delete-sentence" data-id="${sentence.id}" title="Xóa"><i class="fas fa-trash"></i></button>
-        </td>
-      </tr>
-    `;
-    tbody.append(row);
-  });
-}
-
-function viewSentence(id) {
-  $.ajax({
-    url: `${API_BASE_URL}/sentences/${id}`,
-    method: 'GET',
-    success: function(response) {
-      const sentence = extractData(response);
-      alert(`Câu: ${sentence.name}\n\nNội dung:\n${sentence.content}`);
-    },
-    error: function(xhr) {
-      alert('Lỗi tải câu: ' + formatErrorMessage(xhr));
-    }
-  });
-}
-
-function deleteSentence(id) {
-  if (confirm('Bạn có chắc chắn muốn xóa câu này?')) {
-    $.ajax({
-      url: `${API_BASE_URL}/sentences/${id}`,
-      method: 'DELETE',
-      success: function() {
-        loadSentences();
         alert('Xóa thành công!');
       },
       error: function(xhr) {
