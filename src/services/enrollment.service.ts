@@ -38,4 +38,12 @@ export const getAllEnrollments = async () => {
   })
 }
 
+export const checkEnrollment = async (userId: number, courseId: number) => {
+  const enrollment = await prisma.courseEnrollment.findUnique({
+    where: { userId_courseId: { userId, courseId } },
+    select: { id: true, status: true, enrolledAt: true }
+  })
+  return enrollment ? { isEnrolled: true, enrollment } : { isEnrolled: false, enrollment: null }
+}
+
 
