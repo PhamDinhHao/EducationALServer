@@ -1,5 +1,9 @@
 import { Request, Response } from 'express'
 import * as courseService from '../services/course.service'
+import uploadService from '@/services/upload.service'
+import ApiError from '@/utils/ApiError'
+import httpStatus from 'http-status'
+import catchAsync from '@/utils/catchAsync'
 
 export const listCourses = async (_req: Request, res: Response) => {
   try {
@@ -106,5 +110,25 @@ export const queryCourses = async (req: Request, res: Response) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const uploadCourseImage = catchAsync(async (req: Request, res: Response) => {
+  const file = req.file;
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'No file provided');
+  }
+
+  const imageUrl = await uploadService.uploadImage('courses', file.path);
+  
+  if (!imageUrl) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to upload image');
+  }
+
+  res.status(200).json({
+    success: true,
+    data: { url: imageUrl },
+    message: 'Image uploaded successfully'
+  });
+});
 
 

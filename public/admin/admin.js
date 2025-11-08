@@ -716,8 +716,25 @@ function showCourseModal(courseId = null) {
                     <input type="text" class="form-control" id="courseTeacher">
                   </div>
                   <div class="form-group">
-                    <label>Hình ảnh URL</label>
-                    <input type="text" class="form-control" id="courseImg">
+                    <label>Hình ảnh</label>
+                    <div class="mb-2">
+                      <input type="file" class="form-control-file" id="courseImgFile" accept="image/*" style="display: none;">
+                      <button type="button" class="btn btn-sm btn-primary" id="btnUploadImage">
+                        <i class="fa fa-upload"></i> Upload ảnh
+                      </button>
+                      <span class="ml-2 text-muted">hoặc</span>
+                      <button type="button" class="btn btn-sm btn-secondary ml-2" id="btnUseUrl">
+                        Nhập URL
+                      </button>
+                    </div>
+                    <div id="imagePreviewContainer" class="mb-2" style="display: none;">
+                      <img id="imagePreview" src="" alt="Preview" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;">
+                      <button type="button" class="btn btn-sm btn-danger ml-2" id="btnRemoveImage">
+                        <i class="fa fa-times"></i> Xóa
+                      </button>
+                    </div>
+                    <input type="text" class="form-control" id="courseImg" placeholder="URL ảnh hoặc upload ảnh phía trên">
+                    <small class="form-text text-muted">Upload ảnh hoặc nhập URL ảnh (tối đa 5MB, định dạng: JPG, PNG, WEBP)</small>
                   </div>
                   <div class="form-group">
                     <label>URL</label>
@@ -752,6 +769,9 @@ function showCourseModal(courseId = null) {
         saveCourse();
       });
       
+      // Bind image upload events
+      setupCourseImageUpload();
+      
       if (courseId) {
         $.ajax({
           url: `${API_BASE_URL}/courses/${courseId}`,
@@ -761,7 +781,12 @@ function showCourseModal(courseId = null) {
             $('#courseTitle').val(course.title);
             $('#courseDescription').val(course.description || '');
             $('#courseTeacher').val(course.teacher || '');
-            $('#courseImg').val(course.img || '');
+            const imgUrl = course.img || '';
+            $('#courseImg').val(imgUrl);
+            if (imgUrl) {
+              $('#imagePreview').attr('src', imgUrl);
+              $('#imagePreviewContainer').show();
+            }
             $('#courseUrl').val(course.url || '');
             $('#courseDuration').val(course.duration || '');
             $('#courseTypeId').val(course.courseTypeId || course.courseType?.id);
@@ -831,6 +856,89 @@ function deleteCourse(id) {
       },
       error: function(xhr) {
         alert(formatErrorMessage(xhr));
+      }
+    });
+  }
+}
+
+// Setup course image upload functionality
+function setupCourseImageUpload() {
+  let currentImageUrl = '';
+  
+  // Upload image button
+  $('#btnUploadImage').off('click').on('click', function() {
+    $('#courseImgFile').click();
+  });
+  
+  // File input change
+  $('#courseImgFile').off('change').on('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file ảnh (JPG, PNG, WEBP)');
+      return;
+    }
+    
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File ảnh phải nhỏ hơn 5MB');
+      return;
+    }
+    
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      $('#imagePreview').attr('src', e.target.result);
+      $('#imagePreviewContainer').show();
+    };
+    reader.readAsDataURL(file);
+    
+    // Upload file
+    uploadCourseImage(file);
+  });
+  
+  // Use URL button
+  $('#btnUseUrl').off('click').on('click', function() {
+    $('#courseImg').focus();
+    $('#imagePreviewContainer').hide();
+    $('#courseImgFile').val('');
+  });
+  
+  // Remove image button
+  $('#btnRemoveImage').off('click').on('click', function() {
+    $('#courseImg').val('');
+    $('#imagePreview').attr('src', '');
+    $('#imagePreviewContainer').hide();
+    $('#courseImgFile').val('');
+    currentImageUrl = '';
+  });
+  
+  // Upload image function
+  function uploadCourseImage(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    $.ajax({
+      url: `${API_BASE_URL}/courses/upload-image`,
+      method: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function(response) {
+        const imageUrl = response.data?.url || response.url;
+        if (imageUrl) {
+          currentImageUrl = imageUrl;
+          $('#courseImg').val(imageUrl);
+          $('#imagePreview').attr('src', imageUrl);
+          $('#imagePreviewContainer').show();
+        }
+      },
+      error: function(xhr) {
+        alert('Lỗi upload ảnh: ' + formatErrorMessage(xhr));
+        $('#imagePreviewContainer').hide();
+        $('#courseImgFile').val('');
       }
     });
   }
