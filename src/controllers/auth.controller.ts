@@ -132,9 +132,6 @@ const revokeTokens = catchAsync(async (req, res) => {
 
 const updateMe = catchAsync(async (req, res) => {
   const user = req.user as User
-
-  console.log('user,', user)
-  console.log('body', req.body);
   const { name, email, avatar } = req.body
   
   const updatedUser = await (prisma.user.update as any)({
