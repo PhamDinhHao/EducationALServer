@@ -1,4 +1,5 @@
 import prisma from '@/client'
+import assetService from '@/services/asset.service'
 
 export const queryBlogs = async (options: { limit?: number; page?: number; sortBy?: string; sortType?: 'asc' | 'desc' }, filter: { title?: string; tags?: string; userId?: number }) => {
   const page = Number(options.page ?? 1)
@@ -96,17 +97,21 @@ export const createBlog = async (
   input: {
     title: string
     content: string
-    image?: string | null
+    image?: Express.Multer.File | null
     tags?: string | null
   }
 ) => {
+  console.log('input:', input)
   const tagsArray = input.tags?.split(',').map((t) => t.trim())
+  console.log('tagsArray:', tagsArray)
+  const image = input.image ? await assetService.uploadImage(userId, [input.image]) : null
+  console.log('image:', image)
   return prisma.blog.create({
     data: {
       userId,
       title: input.title,
       content: input.content,
-      image: input.image,
+      image: image?.[0]?.src ?? null,
       tags: {
         connectOrCreate: tagsArray?.map((t) => ({
           where: { name: t },
@@ -121,14 +126,33 @@ export const createBlog = async (
 }
 
 export const updateBlog = async (
+  userId: number,
   id: number,
-  input: Partial<{
+  input: {
     title: string
     content: string
-    image: string
-  }>
+    image?: Express.Multer.File | null
+    tags?: string | null
+  }
 ) => {
-  return prisma.blog.update({ where: { id }, data: input })
+  const tagsArray = input.tags?.split(',').map((t) => t.trim())
+  const image = input.image ? await assetService.uploadImage(userId, [input.image]) : undefined
+
+  return prisma.blog.update({
+    where: { id },
+    data: {
+      title: input.title,
+      content: input.content,
+      image: image?.[0]?.src,
+      tags: {
+        connectOrCreate:
+          tagsArray?.map((t) => ({
+            where: { name: t },
+            create: { name: t }
+          })) ?? []
+      }
+    }
+  })
 }
 
 export const deleteBlog = async (id: number) => {

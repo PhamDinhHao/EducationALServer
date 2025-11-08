@@ -50,18 +50,18 @@ export const listAllBlogComments = async (req: Request, res: Response) => {
  */
 export const postBlogComment = async (req: Request, res: Response) => {
   const blogId = parseInt(req.params.blogId)
-  const { userId, content, parentId } = req.body
-
-  if (!userId || !content) {
+  const { user_id, content, parent_id } = req.body
+  console.log('req.body:', req.body)
+  if (!user_id || !content) {
     return res.status(400).json({ message: 'Thiếu thông tin bình luận' })
   }
 
   try {
     let comment
-    if (parentId) {
-      comment = await blogCommentService.createBlogCommentReply(blogId, parentId, userId, content)
+    if (parent_id) {
+      comment = await blogCommentService.createBlogCommentReply(blogId, parent_id, user_id, content)
     } else {
-      comment = await blogCommentService.createBlogComment(blogId, userId, content)
+      comment = await blogCommentService.createBlogComment(blogId, user_id, content)
     }
 
     res.status(201).json(comment)
