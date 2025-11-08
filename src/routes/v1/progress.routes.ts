@@ -4,7 +4,9 @@ import auth from '@/middlewares/auth'
 
 const router = Router()
 
-router.put('/', progressController.upsertProgress)
+router.put('/', auth(), progressController.upsertProgress)
+router.get('/me', auth(), progressController.getMyProgressByCourse)
+router.get('/me/lessons/:lessonId', auth(), progressController.getMyLessonProgress)
 router.get('/users/:userId/lessons/:lessonId', progressController.getLessonProgressForUser)
 router.get('/users/:userId', progressController.listProgressByCourseForUser)
 router.get('/', auth('manageUsers'), progressController.getAllProgress)
