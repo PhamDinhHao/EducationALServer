@@ -15,10 +15,34 @@ export const unenroll = async (userId: number, courseId: number) => {
 }
 
 export const listUserEnrollments = async (userId: number) => {
-  return prisma.courseEnrollment.findMany({
+  const enrollments = await prisma.courseEnrollment.findMany({
     where: { userId },
     include: { course: true, user: true },
     orderBy: { enrolledAt: 'desc' }
+  })
+
+  if (enrollments.length === 0) {
+    return enrollments
+  }
+
+  const courseIds = [...new Set(enrollments.map((enrollment) => enrollment.courseId))]
+
+  const enrollmentCounts = await prisma.courseEnrollment.groupBy({
+    by: ['courseId'],
+    _count: { courseId: true },
+    where: { courseId: { in: courseIds } }
+  })
+
+  return enrollments.map((enrollment) => {
+    const enrollCount = enrollmentCounts.find((ec) => ec.courseId === enrollment.courseId)?._count.courseId || 0
+    return {
+      ...enrollment,
+      course: {
+        ...enrollment.course,
+        enrollCount: enrollCount,
+        students: enrollCount || enrollment.course.students || 0,
+      }
+    }
   })
 }
 
