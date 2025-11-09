@@ -80,12 +80,12 @@ export const getRelatedBlogs = async (id: number) => {
   })
 }
 
-export const getRecentBlogs = async () => {
+export const getRecentBlogs = async (limit?: number) => {
   return prisma.blog.findMany({
     orderBy: {
       createdAt: 'desc'
     },
-    take: 3
+    take: limit ?? 3
   })
 }
 export const getBlogById = async (id: number) => {

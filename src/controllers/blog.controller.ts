@@ -11,7 +11,8 @@ export const getRelatedBlogs = async (req: Request, res: Response) => {
 }
 
 export const getRecentBlogs = async (req: Request, res: Response) => {
-  const recentBlogs = await blogService.getRecentBlogs()
+  const limit = req.query.limit
+  const recentBlogs = await blogService.getRecentBlogs(Number(limit))
   res.json(recentBlogs)
 }
 
