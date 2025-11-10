@@ -5,7 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "npx nodemon",
-    "build": "rimraf ./dist && tsc && tsc-alias",
+    "build": "npx prisma generate && rimraf ./dist && tsc && tsc-alias",
     "postinstall": "npx prisma migrate deploy",
     "start": "npm run build && node dist/index.js",
     "db:migrate": "cross-env NAME=$NAME npx prisma migrate dev --name %NAME% --create-only && npx prisma generate",
