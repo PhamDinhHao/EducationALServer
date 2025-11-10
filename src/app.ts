@@ -60,14 +60,14 @@ app.use(compression())
 // enable cors
 app.use(
   cors({
-    origin: process.env.NODE_ENV === 'production' ? 'https://education-arbalxal7-pham-haos-projects.vercel.app' : 'http://localhost:5175',
+    origin: process.env.NODE_ENV === 'production' ? 'https://education-sandy-xi.vercel.app' : 'http://localhost:5175',
     credentials: true
   })
 )
 app.options(
   '*',
   cors({
-    origin: process.env.NODE_ENV === 'production' ? 'https://education-arbalxal7-pham-haos-projects.vercel.app' : 'http://localhost:5175',
+    origin: process.env.NODE_ENV === 'production' ? 'https://education-sandy-xi.vercel.app' : 'http://localhost:5175',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
