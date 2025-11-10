@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npx nodemon",
     "build": "rimraf ./dist && tsc && tsc-alias",
-    "start": "node dist/index.ts",
+    "start": "npm run build && node dist/index.js",
     "db:migrate": "cross-env NAME=$NAME npx prisma migrate dev --name %NAME% --create-only && npx prisma generate",
     "db:rollback": "npx prisma migrate reset --force && npx prisma generate",
     "db:push": "npx prisma db push",
