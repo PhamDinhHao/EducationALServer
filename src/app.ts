@@ -10,7 +10,6 @@ import config from '@configs/config'
 import morgan from '@configs/morgan'
 import { jwtStrategy } from '@configs/passport'
 
-// import xss from '@middlewares/xss'
 import { errorConverter, errorHandler } from '@/middlewares/error'
 import { authLimiter } from '@middlewares/rateLimiter'
 
@@ -25,7 +24,7 @@ if (config.env !== 'test') {
   app.use(morgan.errorHandler)
 }
 
-// set security HTTP headers with CSP configuration for admin dashboard
+// set security HTTP headers with CSP configuration
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -42,38 +41,30 @@ app.use(
   })
 )
 
+// parse cookies BEFORE CORS and JSON
+app.use(cookieParser())
+
+// enable CORS with credentials
+app.use(
+  cors({
+    origin: process.env.NODE_ENV === 'production' ? 'https://education-sandy-xi.vercel.app' : 'http://localhost:5175',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Set-Cookie'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+  })
+)
+
+app.options('*', cors()) // preflight
+
 // parse json request body (increase limit for base64 images)
 app.use(express.json({ limit: '50mb' }))
 
 // parse urlencoded request body (increase limit for large payloads)
 app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 
-// parse cookies
-app.use(cookieParser())
-
-// sanitize request data
-// app.use(xss())
-
 // gzip compression
 app.use(compression())
-
-// enable cors
-app.use(
-  cors({
-    origin: process.env.NODE_ENV === 'production' ? 'https://education-sandy-xi.vercel.app' : 'http://localhost:5175',
-    credentials: true
-  })
-)
-app.options(
-  '*',
-  cors({
-    origin: process.env.NODE_ENV === 'production' ? 'https://education-sandy-xi.vercel.app' : 'http://localhost:5175',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Set-Cookie']
-  })
-)
 
 // jwt authentication
 app.use(passport.initialize())
