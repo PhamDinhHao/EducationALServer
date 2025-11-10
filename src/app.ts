@@ -31,32 +31,11 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "'unsafe-eval'",
-          'https://code.jquery.com',
-          'https://cdn.jsdelivr.net',
-          'https://cdnjs.cloudflare.com'
-        ],
-        styleSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          'https://cdn.jsdelivr.net',
-          'https://cdnjs.cloudflare.com',
-          'https://fonts.googleapis.com'
-        ],
-        fontSrc: [
-          "'self'",
-          'https://cdnjs.cloudflare.com',
-          'https://fonts.gstatic.com'
-        ],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://code.jquery.com', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com'],
         imgSrc: ["'self'", 'data:', 'https:', 'http:'],
-        connectSrc: [
-          "'self'",
-          'https://cdn.jsdelivr.net',
-          'https://cdnjs.cloudflare.com'
-        ],
+        connectSrc: ["'self'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
         frameSrc: ["'self'"]
       }
     }

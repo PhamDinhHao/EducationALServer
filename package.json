@@ -1,12 +1,12 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.ts",
   "type": "commonjs",
   "scripts": {
     "dev": "npx nodemon",
     "build": "rimraf ./dist && tsc && tsc-alias",
-    "start": "node dist/index.js",
+    "start": "node dist/index.ts",
     "db:migrate": "cross-env NAME=$NAME npx prisma migrate dev --name %NAME% --create-only && npx prisma generate",
     "db:rollback": "npx prisma migrate reset --force && npx prisma generate",
     "db:push": "npx prisma db push",
