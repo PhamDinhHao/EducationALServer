@@ -4,8 +4,7 @@ const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict' as const,
-  path: '/',
-  domain: process.env.NODE_ENV === 'production' ? 'example.com' : 'localhost'
+  path: '/'
 }
 
 export const setCookie = (res: Response, name: string, value: string, maxAge: number) => {
