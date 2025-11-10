@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
     cb(null, 'tmp/uploads')
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
   }
 })
@@ -27,8 +27,8 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: any) => {
   }
 }
 
-export const upload = multer({ 
+export const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }
+  limits: { fileSize: 20 * 1024 * 1024, fieldSize: 25 * 1024 * 1024 }
 })

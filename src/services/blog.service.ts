@@ -1,5 +1,7 @@
 import prisma from '@/client'
 import assetService from '@/services/asset.service'
+import path from 'path'
+import fs from 'fs'
 
 export const queryBlogs = async (options: { limit?: number; page?: number; sortBy?: string; sortType?: 'asc' | 'desc' }, filter: { title?: string; tags?: string; userId?: number }) => {
   const page = Number(options.page ?? 1)
@@ -92,6 +94,56 @@ export const getBlogById = async (id: number) => {
   return prisma.blog.findUnique({ where: { id }, include: { tags: true, user: true, comments: true } })
 }
 
+const extractBase64Images = (html: string) => {
+  const regex = /<img[^>]+src="data:image\/([^;]+);base64,([^"]+)"[^>]*>/g
+  const matches = [...html.matchAll(regex)]
+  return matches.map((m) => ({
+    fullMatch: m[0],
+    mimeType: m[1],
+    base64Data: m[2]
+  }))
+}
+const uploadBase64Images = async (userId: number, images: { base64Data: string; mimeType: string }[]) => {
+  const uploadedUrls: string[] = []
+
+  for (const img of images) {
+    const buffer = Buffer.from(img.base64Data, 'base64')
+    const filename = `base64-${Date.now()}-${Math.random().toString(36).slice(2)}.${img.mimeType.split('/')[1]}`
+    const filepath = path.join('tmp', 'uploads', filename)
+
+    // ✳️ Lưu file tạm thật
+    fs.writeFileSync(filepath, new Uint8Array(buffer))
+
+    const fakeFile: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: filename,
+      encoding: '7bit',
+      mimetype: `image/${img.mimeType}`,
+      size: buffer.length,
+      destination: 'tmp/uploads',
+      filename,
+      path: filepath,
+      buffer: buffer,
+      stream: undefined as any
+    }
+
+    const uploaded = await assetService.uploadImage(userId, [fakeFile])
+    uploadedUrls.push(uploaded[0].src)
+
+    // ✅ Xóa file tạm sau upload
+    fs.unlinkSync(filepath)
+  }
+
+  return uploadedUrls
+}
+const replaceImagesInContent = (html: string, base64Images: any[], urls: string[]) => {
+  let newContent = html
+  base64Images.forEach((img, i) => {
+    newContent = newContent.replace(img.fullMatch, `<img src="${urls[i]}" />`)
+  })
+  return newContent
+}
+
 export const createBlog = async (
   userId: number,
   input: {
@@ -101,16 +153,23 @@ export const createBlog = async (
     tags?: string | null
   }
 ) => {
-  console.log('input:', input)
-  const tagsArray = input.tags?.split(',').map((t) => t.trim())
-  console.log('tagsArray:', tagsArray)
+  // 1. Xử lý ảnh trong content
+  const base64Images = extractBase64Images(input.content)
+  const uploadedUrls = await uploadBase64Images(userId, base64Images)
+  const cleanContent = replaceImagesInContent(input.content, base64Images, uploadedUrls)
+
+  // 2. Xử lý ảnh thumbnail chính (nếu có)
   const image = input.image ? await assetService.uploadImage(userId, [input.image]) : null
-  console.log('image:', image)
+
+  // 3. Xử lý tags
+  const tagsArray = input.tags?.split(',').map((t) => t.trim())
+
+  // 4. Lưu vào DB
   return prisma.blog.create({
     data: {
       userId,
       title: input.title,
-      content: input.content,
+      content: cleanContent, // content đã thay link ảnh thật
       image: image?.[0]?.src ?? null,
       tags: {
         connectOrCreate: tagsArray?.map((t) => ({

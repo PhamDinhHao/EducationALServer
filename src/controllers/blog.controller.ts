@@ -67,7 +67,6 @@ export const getBlogById = async (req: Request, res: Response) => {
 
 export const createBlog = catchAsync(async (req, res) => {
   const user = req.user as User
-  console.log('req.file:', req.file)
   const { title, content, tags } = req.body
   const image = req.file ? req.file : null
 
@@ -98,7 +97,6 @@ export const updateBlog = catchAsync(async (req, res) => {
   const id = parseInt(req.params.id)
   const { title, content, tags } = req.body
   const image = req.file ? req.file : null
-  console.log('req.body:', req.body)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const updated = await blogService.updateBlog(user.id, id, { title, content, tags, image })
