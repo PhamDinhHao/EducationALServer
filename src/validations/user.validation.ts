@@ -26,13 +26,13 @@ export type TQueryUsers = z.infer<typeof getUsers.query>
 
 const getUser = {
   params: z.object({
-    userId: z.number().int().positive()
+    userId: z.coerce.number().int().positive()
   })
 } as const
 
 const updateUser = {
   params: z.object({
-    userId: z.number().int().positive()
+    userId: z.coerce.number().int().positive()
   }),
   body: z
     .object({
@@ -47,7 +47,7 @@ const updateUser = {
 
 const deleteUser = {
   params: z.object({
-    userId: z.number().int().positive()
+    userId: z.coerce.number().int().positive()
   })
 } as const
 

@@ -77,8 +77,27 @@ const deleteImageById = async (userId: number, image: Asset): Promise<Asset> => 
   return asset
 }
 
+const getAllAssets = async <Key extends keyof Asset>(
+  keys: Key[] = ['id', 'name', 'src', 'type', 'userId'] as Key[]
+): Promise<Pick<Asset, Key>[]> => {
+  const assets = await prisma.asset.findMany({
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          name: true
+        }
+      }
+    },
+    orderBy: { id: 'desc' }
+  })
+  return assets as Pick<Asset, Key>[]
+}
+
 export default {
   uploadImage,
   getImages,
+  getAllAssets,
   deleteImageById
 }

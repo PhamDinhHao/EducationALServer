@@ -19,7 +19,7 @@ const loginUserWithEmailAndPassword = async (email: string, password: string): P
   if (!user || !(await isPasswordMatch(password, user.password as string))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password')
   }
-  return _.omit(user, ['password'])
+  return _.omit(user, ['password']) as Omit<User, 'password'>
 }
 
 /**

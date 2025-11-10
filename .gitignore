@@ -25,5 +25,5 @@ tmp
 *.njsproj
 *.sln
 *.sw?
-
 .env
+uploads

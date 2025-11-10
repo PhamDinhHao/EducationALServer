@@ -37,8 +37,14 @@ const deleteImage = catchAsync(async (req: Request, res: Response) => {
   res.status(httpStatus.NO_CONTENT).send()
 })
 
+const getAllAssets = catchAsync(async (_req: Request, res: Response) => {
+  const data = await assetService.getAllAssets()
+  res.status(httpStatus.OK).send(data)
+})
+
 export default {
   uploadImage,
   getImages,
+  getAllAssets,
   deleteImage
 }

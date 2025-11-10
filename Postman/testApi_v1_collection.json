@@ -1,0 +1,373 @@
+{
+  "info": {
+    "name": "EducationALServer API v1",
+    "_postman_id": "7e2f3d3a-5b7b-41b3-9f55-ec7b7a5a6d10",
+    "description": "Postman collection for EducationALServer v1 APIs (auth, users, templates, assets, sentences, gemini, plan, exercise, ai, courses, lessons, comment, enrollments, progress).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000/v1" },
+    { "key": "authToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"User One\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user1@example.com\",\n  \"password\": \"Password123!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me (requires auth)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        { "name": "Refresh Tokens", "request": { "method": "POST", "url": "{{baseUrl}}/auth/refresh-tokens" } },
+        { "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/auth/logout" } },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/forgot-password",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user1@example.com\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users (requires scoped auth)",
+      "item": [
+        { "name": "List Users", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/users" } },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/users",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user2@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"User Two\"\n}" }
+          }
+        },
+        { "name": "Get User by Id", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/users/1" } },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/users/1",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"User One Updated\"\n}" }
+          }
+        },
+        { "name": "Delete User", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/users/2" } }
+      ]
+    },
+    {
+      "name": "Templates (requires auth)",
+      "item": [
+        { "name": "List Templates", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/templates" } },
+        {
+          "name": "Create Template",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/templates",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Welcome\",\n  \"content\": \"<h1>Hello</h1>\",\n  \"type\": \"HTML\"\n}" }
+          }
+        },
+        { "name": "Get Template by Id", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/templates/1" } },
+        {
+          "name": "Update Template",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/templates/1",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Welcome Updated\",\n  \"content\": \"<h1>Hello!</h1>\",\n  \"type\": \"HTML\"\n}" }
+          }
+        },
+        { "name": "Delete Template", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/templates/1" } }
+      ]
+    },
+    {
+      "name": "Assets (requires auth, multipart)",
+      "item": [
+        { "name": "List Assets", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/assets" } },
+        {
+          "name": "Upload Assets (files[])",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": "{{baseUrl}}/assets",
+            "body": {
+              "mode": "formdata",
+              "formdata": [ { "key": "files", "type": "file", "src": [] } ]
+            }
+          }
+        },
+        { "name": "Delete Asset", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/assets/1" } }
+      ]
+    },
+    {
+      "name": "Images",
+      "item": [
+        { "name": "List Images", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/assets" } },
+        {
+          "name": "Upload Images (files[])",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }],
+            "url": "{{baseUrl}}/assets",
+            "body": { "mode": "formdata", "formdata": [ { "key": "files", "type": "file", "src": [] } ] }
+          }
+        },
+        { "name": "Delete Image", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/assets/1" } }
+      ]
+    },
+    {
+      "name": "Sentences (requires auth)",
+      "item": [
+        { "name": "List Sentences", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/sentences" } },
+        {
+          "name": "Create Sentence",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "url": "{{baseUrl}}/sentences",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Example\",\n  \"content\": \"This is a sentence\"\n}" }
+          }
+        },
+        { "name": "Get Sentence by Id", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/sentences/1" } },
+        { "name": "Update Sentence", "request": { "method": "PATCH", "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" }, { "key": "Content-Type", "value": "application/json" } ], "url": "{{baseUrl}}/sentences/1", "body": { "mode": "raw", "raw": "{\n  \"content\": \"Updated\"\n}" } } },
+        { "name": "Delete Sentence", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{authToken}}" }], "url": "{{baseUrl}}/sentences/1" } }
+      ]
+    },
+    {
+      "name": "Gemini",
+      "item": [
+        {
+          "name": "Generate (file upload)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/gemini/generate",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] },
+                { "key": "matrix", "type": "text", "value": "{\"subject\":\"Math\"}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Plan",
+      "item": [
+        { "name": "Generate Plan", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/plan/plans", "body": { "mode": "raw", "raw": "{\n  \"goal\": \"Learn JS\",\n  \"level\": \"beginner\"\n}" } } },
+        { "name": "Generate Initiative", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/plan/initiatives", "body": { "mode": "raw", "raw": "{\n  \"topic\": \"Productivity\"\n}" } } }
+      ]
+    },
+    {
+      "name": "Exercise",
+      "item": [
+        {
+          "name": "Chat with AI (image)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/exercise/chat",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": [] },
+                { "key": "prompt", "type": "text", "value": "Solve this exercise" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "Generate with messages",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/ai/generate",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"messages\": [\n    {\"role\": \"user\", \"content\": \"Hello\"}\n  ]\n}" }
+          }
+        },
+        {
+          "name": "Generate text",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/ai/generate-text",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"prompt\": \"Say hi\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "item": [
+        { "name": "List Courses", "request": { "method": "GET", "url": "{{baseUrl}}/courses" } },
+        {
+          "name": "Create Course",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/courses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"React for Beginners\",\n  \"description\": \"Learn React fundamentals\",\n  \"img\": \"https://example.com/img.png\",\n  \"url\": \"https://example.com/course\",\n  \"teacher\": \"John Doe\",\n  \"students\": 0,\n  \"duration\": \"10h\",\n  \"courseTypeId\": 1\n}"
+            }
+          }
+        },
+        { "name": "Get Course by Id", "request": { "method": "GET", "url": "{{baseUrl}}/courses/1" } },
+        { "name": "Update Course", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/courses/1", "body": { "mode": "raw", "raw": "{\n  \"title\": \"React Basics Updated\"\n}" } } },
+        { "name": "Delete Course", "request": { "method": "DELETE", "url": "{{baseUrl}}/courses/1" } }
+      ]
+    },
+    {
+      "name": "Course Types",
+      "item": [
+        { "name": "List Course Types", "request": { "method": "GET", "url": "{{baseUrl}}/course-types" } },
+        {
+          "name": "Create Course Type",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/course-types",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Programming\",\n  \"description\": \"Coding courses\"\n}" }
+          }
+        },
+        { "name": "Get Course Type by Id", "request": { "method": "GET", "url": "{{baseUrl}}/course-types/1" } },
+        { "name": "Update Course Type", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/course-types/1", "body": { "mode": "raw", "raw": "{\n  \"description\": \"Programming related courses\"\n}" } } },
+        { "name": "Delete Course Type", "request": { "method": "DELETE", "url": "{{baseUrl}}/course-types/1" } }
+      ]
+    },
+    {
+      "name": "Lessons",
+      "item": [
+        {
+          "name": "Create Lesson",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/lessons",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Intro\",\n  \"description\": \"Course overview\",\n  \"duration\": 15,\n  \"src\": \"https://video.example.com/intro.mp4\",\n  \"order\": 1,\n  \"courseId\": 1\n}"
+            }
+          }
+        },
+        { "name": "Get Lessons by Course", "request": { "method": "GET", "url": "{{baseUrl}}/lessons/course/1" } },
+        { "name": "Get Lesson by Id", "request": { "method": "GET", "url": "{{baseUrl}}/lessons/1" } },
+        { "name": "Update Lesson", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": "{{baseUrl}}/lessons/1", "body": { "mode": "raw", "raw": "{\n  \"title\": \"Intro Updated\"\n}" } } },
+        { "name": "Delete Lesson", "request": { "method": "DELETE", "url": "{{baseUrl}}/lessons/1" } }
+      ]
+    },
+    {
+      "name": "Comments",
+      "item": [
+        { "name": "List Comments for Lesson", "request": { "method": "GET", "url": "{{baseUrl}}/comment/lessons/1/comments" } },
+        {
+          "name": "Create Parent Comment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/comment/lessons/1/comments",
+            "body": { "mode": "raw", "raw": "{\n  \"author\": \"User One\",\n  \"content\": \"Great lesson!\"\n}" }
+          }
+        },
+        {
+          "name": "Create Reply",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/comment/lessons/1/comments",
+            "body": { "mode": "raw", "raw": "{\n  \"author\": \"User Two\",\n  \"content\": \"I agree!\",\n  \"parentId\": 1\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enrollments",
+      "item": [
+        {
+          "name": "Enroll",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/enrollments",
+            "body": { "mode": "raw", "raw": "{\n  \"userId\": 1,\n  \"courseId\": 1\n}" }
+          }
+        },
+        {
+          "name": "Unenroll",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/enrollments",
+            "body": { "mode": "raw", "raw": "{\n  \"userId\": 1,\n  \"courseId\": 1\n}" }
+          }
+        },
+        { "name": "List User Enrollments", "request": { "method": "GET", "url": "{{baseUrl}}/enrollments/users/1" } }
+      ]
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "Upsert Progress",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/progress",
+            "body": { "mode": "raw", "raw": "{\n  \"userId\": 1,\n  \"lessonId\": 1,\n  \"progress\": 35\n}" }
+          }
+        },
+        { "name": "Get Lesson Progress for User", "request": { "method": "GET", "url": "{{baseUrl}}/progress/users/1/lessons/1" } },
+        { "name": "List Progress by Course for User", "request": { "method": "GET", "url": "{{baseUrl}}/progress/users/1?courseId=1" } }
+      ]
+    }
+  ]
+}
+
+

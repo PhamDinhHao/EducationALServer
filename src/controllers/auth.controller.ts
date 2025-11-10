@@ -6,6 +6,11 @@ import catchAsync from '@utils/catchAsync'
 import { authService, userService, tokenService, emailService } from '@/services'
 import config from '@/configs/config'
 import { clearCookie, setCookie } from '@/utils/cookie'
+import { isPasswordMatch, encryptPassword } from '@utils/encryption'
+import ApiError from '@/utils/ApiError'
+import prisma from '@/client'
+import uploadService from '@/services/upload.service'
+
 const register = catchAsync(async (req, res) => {
   const { email, password } = req.body
   const user = await userService.createUser(email, password)
@@ -103,8 +108,17 @@ const verifyEmail = catchAsync(async (req, res) => {
 
 const getMe = catchAsync(async (req, res) => {
   const user = req.user as User
+  const userWithAvatar = await (prisma.user.findUnique as any)({
+    where: { id: user.id },
+    select: { id: true, email: true, name: true, avatar: true, role: true, isEmailVerified: true }
+  })
+  console.log('user:', userWithAvatar)
+  if (!userWithAvatar) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
+  }
+  const userWithoutPassword = _.omit(userWithAvatar, ['createdAt', 'updatedAt'])
   res.status(httpStatus.OK).send({
-    data: { user },
+    data: { user: userWithoutPassword },
     success: true,
     message: 'User details fetched successfully'
   })
@@ -114,6 +128,78 @@ const revokeTokens = catchAsync(async (req, res) => {
   const user = req.user as User
   await authService.revokeTokens(user.id)
   res.status(httpStatus.NO_CONTENT).send()
+})
+
+const updateMe = catchAsync(async (req, res) => {
+  const user = req.user as User
+  const { name, email, avatar } = req.body
+  
+  const updatedUser = await (prisma.user.update as any)({
+    where: { id: user.id },
+    data: { name, email, avatar },
+    select: { id: true, email: true, name: true, avatar: true, role: true, isEmailVerified: true }
+  })
+  const userWithoutPassword = _.omit(updatedUser, ['password', 'createdAt', 'updatedAt'])
+  
+  res.status(httpStatus.OK).send({
+    data: { user: userWithoutPassword },
+    success: true,
+    message: 'Profile updated successfully'
+  })
+})
+
+const uploadAvatar = catchAsync(async (req, res) => {
+  const user = req.user as User
+  const file = req.file
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'No file provided')
+  }
+
+  const avatarUrl = await uploadService.uploadImage('avatars', file.path)
+  
+  if (!avatarUrl) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to upload avatar')
+  }
+
+  const updatedUser = await (prisma.user.update as any)({
+    where: { id: user.id },
+    data: { avatar: avatarUrl },
+    select: { id: true, email: true, name: true, avatar: true, role: true, isEmailVerified: true }
+  })
+  const userWithoutPassword = _.omit(updatedUser, ['createdAt', 'updatedAt'])
+  
+  res.status(httpStatus.OK).send({
+    data: { user: userWithoutPassword },
+    success: true,
+    message: 'Avatar uploaded successfully'
+  })
+})
+
+const changePassword = catchAsync(async (req, res) => {
+  const user = req.user as User
+  const { oldPassword, newPassword } = req.body
+
+  if (!oldPassword || !newPassword) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Old password and new password are required')
+  }
+
+  const userWithPassword = await userService.getUserById(user.id, ['id', 'password'])
+  if (!userWithPassword) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
+  }
+
+  if (!(await isPasswordMatch(oldPassword, userWithPassword.password as string))) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect old password')
+  }
+
+  const encryptedPassword = await encryptPassword(newPassword)
+  await userService.updateUserById(user.id, { password: encryptedPassword })
+
+  res.status(httpStatus.OK).send({
+    success: true,
+    message: 'Password changed successfully'
+  })
 })
 
 export default {
@@ -126,5 +212,8 @@ export default {
   sendVerificationEmail,
   verifyEmail,
   getMe,
-  revokeTokens
+  updateMe,
+  changePassword,
+  revokeTokens,
+  uploadAvatar
 }
