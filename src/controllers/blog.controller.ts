@@ -6,13 +6,15 @@ import catchAsync from '@/utils/catchAsync'
 
 export const getRelatedBlogs = async (req: Request, res: Response) => {
   const id = parseInt(req.params.id)
-  const relatedBlogs = await blogService.getRelatedBlogs(id)
+  const type = req.query.type as 'BLOG' | 'CONTESTS' | undefined
+  const relatedBlogs = await blogService.getRelatedBlogs(id, type)
   res.json(relatedBlogs)
 }
 
 export const getRecentBlogs = async (req: Request, res: Response) => {
   const limit = req.query.limit
-  const recentBlogs = await blogService.getRecentBlogs(Number(limit))
+  const type = req.query.type as 'BLOG' | 'CONTESTS'
+  const recentBlogs = await blogService.getRecentBlogs(Number(limit), type)
   res.json(recentBlogs)
 }
 
@@ -37,8 +39,7 @@ export const listAllBlogs = async (req: Request, res: Response) => {
       page: Number(query.page ?? 1)
     }
 
-    const filter = _.pick(query, ['title', 'tags', 'userId', 'createdAt'])
-
+    const filter = _.pick(query, ['title', 'tags', 'userId', 'createdAt', 'type'])
     const result = await blogService.queryBlogs(options, filter)
     res.json(result)
   } catch (err: unknown) {
@@ -67,7 +68,7 @@ export const getBlogById = async (req: Request, res: Response) => {
 
 export const createBlog = catchAsync(async (req, res) => {
   const user = req.user as User
-  const { title, content, tags } = req.body
+  const { title, content, tags, type } = req.body
   const image = req.file ? req.file : null
 
   if (!title || !content) {
@@ -79,7 +80,8 @@ export const createBlog = catchAsync(async (req, res) => {
       title,
       content,
       image,
-      tags
+      tags,
+      type
     })
 
     res.status(201).json(created)

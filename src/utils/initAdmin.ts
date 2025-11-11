@@ -3,7 +3,6 @@ import prisma from '@/client'
 import logger from '@configs/logger'
 import { encryptPassword } from '@utils/encryption'
 
-
 export const initializeDefaultAdmin = async (): Promise<void> => {
   try {
     const existingAdmin = await prisma.user.findFirst({
@@ -16,7 +15,6 @@ export const initializeDefaultAdmin = async (): Promise<void> => {
       logger.info('Admin user already exists, skipping default admin creation')
       return
     }
-
 
     const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@example.com'
     const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin123!'
@@ -53,4 +51,3 @@ export const initializeDefaultAdmin = async (): Promise<void> => {
     logger.error('Error initializing default admin:', error)
   }
 }
-

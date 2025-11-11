@@ -3,13 +3,14 @@ import assetService from '@/services/asset.service'
 import path from 'path'
 import fs from 'fs'
 
-export const queryBlogs = async (options: { limit?: number; page?: number; sortBy?: string; sortType?: 'asc' | 'desc' }, filter: { title?: string; tags?: string; userId?: number }) => {
+export const queryBlogs = async (
+  options: { limit?: number; page?: number; sortBy?: string; sortType?: 'asc' | 'desc' },
+  filter: { title?: string; tags?: string; userId?: number; type?: 'BLOG' | 'CONTESTS' }
+) => {
   const page = Number(options.page ?? 1)
   const limit = Number(options.limit ?? 12)
   const sortBy = options.sortBy ?? 'createdAt'
   const sortType = options.sortType ?? 'desc'
-
-  const total = await prisma.blog.count()
 
   const blogs = await prisma.blog.findMany({
     include: { tags: true },
@@ -29,7 +30,26 @@ export const queryBlogs = async (options: { limit?: number; page?: number; sortB
               }
             }
           }
-        : {})
+        : {}),
+      ...(filter.type ? { type: filter.type } : {})
+    }
+  })
+  const total = await prisma.blog.count({
+    where: {
+      ...(filter.title ? { title: { contains: filter.title } } : {}),
+      ...(filter.userId ? { userId: filter.userId } : {}),
+      ...(filter.tags
+        ? {
+            tags: {
+              some: {
+                name: {
+                  in: filter.tags.split(',').map((t) => t.trim())
+                }
+              }
+            }
+          }
+        : {}),
+      ...(filter.type ? { type: filter.type } : {})
     }
   })
 
@@ -46,15 +66,15 @@ export const queryBlogs = async (options: { limit?: number; page?: number; sortB
   }
 }
 
-export const getRelatedBlogs = async (id: number) => {
+export const getRelatedBlogs = async (id: number, type?: 'BLOG' | 'CONTESTS') => {
   const currentBlog = await prisma.blog.findUnique({
-    where: { id },
+    where: { id, ...(type ? { type: type } : {}) },
     include: { tags: true }
   })
 
   if (!currentBlog || currentBlog.tags.length === 0) {
     return prisma.blog.findMany({
-      where: { id: { not: id } },
+      where: { id: { not: id }, ...(type ? { type: type } : {}) },
       orderBy: { createdAt: 'desc' },
       take: 3
     })
@@ -69,7 +89,8 @@ export const getRelatedBlogs = async (id: number) => {
         some: {
           id: { in: tagIds }
         }
-      }
+      },
+      ...(type ? { type: type } : {})
     },
     include: {
       tags: true,
@@ -82,14 +103,16 @@ export const getRelatedBlogs = async (id: number) => {
   })
 }
 
-export const getRecentBlogs = async (limit?: number) => {
+export const getRecentBlogs = async (limit?: number, type?: 'BLOG' | 'CONTESTS') => {
+  const safeLimit = Math.min(limit ?? 3, 20)
+
   return prisma.blog.findMany({
-    orderBy: {
-      createdAt: 'desc'
-    },
-    take: limit ?? 3
+    where: type ? { type: type as 'BLOG' | 'CONTESTS' } : {},
+    orderBy: { createdAt: 'desc' },
+    take: safeLimit
   })
 }
+
 export const getBlogById = async (id: number) => {
   return prisma.blog.findUnique({ where: { id }, include: { tags: true, user: true, comments: true } })
 }
@@ -113,7 +136,6 @@ const uploadBase64Images = async (userId: number, images: { base64Data: string; 
 
     // ✳️ Lưu file tạm thật
     fs.writeFileSync(filepath, new Uint8Array(buffer))
-
     const fakeFile: Express.Multer.File = {
       fieldname: 'file',
       originalname: filename,
@@ -151,8 +173,10 @@ export const createBlog = async (
     content: string
     image?: Express.Multer.File | null
     tags?: string | null
+    type?: 'BLOG' | 'CONTESTS'
   }
 ) => {
+  console.log(input)
   // 1. Xử lý ảnh trong content
   const base64Images = extractBase64Images(input.content)
   const uploadedUrls = await uploadBase64Images(userId, base64Images)
@@ -176,7 +200,8 @@ export const createBlog = async (
           where: { name: t },
           create: { name: t }
         }))
-      }
+      },
+      type: input.type
     },
     include: {
       tags: true

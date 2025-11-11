@@ -233,12 +233,12 @@ model Blog {
   title       String
   content     String         @db.Text
   image       String?
+  type        BlogType       @default(BLOG)
   createdAt   DateTime       @default(now()) @map("created_at")
   updatedAt   DateTime       @updatedAt @map("updated_at")
   user        User           @relation(fields: [userId], references: [id])
   tags        BlogTag[]      @relation("BlogToTags")
   comments    BlogComment[]  @relation("BlogToComments")
-
   @@index([userId], map: "blogs_user_id_fkey")
   @@map("blogs")
 }
@@ -272,5 +272,12 @@ model BlogComment {
   @@index([userId], map: "blog_comments_user_id_fkey")
   @@index([parentId], map: "blog_comments_parent_id_fkey")
   @@map("blog_comments")
+}
+
+enum BlogType {
+  BLOG
+  CONTESTS
+
+  @@map("blog_type_enum")
 }
 
