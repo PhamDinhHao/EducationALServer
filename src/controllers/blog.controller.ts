@@ -2,8 +2,13 @@ import { Request, Response } from 'express'
 import * as blogService from '@/services/blog.service'
 import { User } from '@prisma/client'
 import _ from 'lodash'
-import catchAsync from '@/utils/catchAsync'
+import catchAsync from '@utils/catchAsync'
 
+export const heartBlog = catchAsync(async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id)
+  const hearted = await blogService.heartBlog(id)
+  res.json(hearted)
+})
 export const getRelatedBlogs = async (req: Request, res: Response) => {
   const id = parseInt(req.params.id)
   const type = req.query.type as 'BLOG' | 'CONTESTS' | undefined

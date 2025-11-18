@@ -3,6 +3,9 @@ import assetService from '@/services/asset.service'
 import path from 'path'
 import fs from 'fs'
 
+export const heartBlog = async (id: number) => {
+  return prisma.blog.update({ where: { id }, data: { hearts: { increment: 1 } } })
+}
 export const queryBlogs = async (
   options: { limit?: number; page?: number; sortBy?: string; sortType?: 'asc' | 'desc' },
   filter: { title?: string; tags?: string; userId?: number; type?: 'BLOG' | 'CONTESTS' }

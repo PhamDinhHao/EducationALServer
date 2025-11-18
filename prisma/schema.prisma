@@ -234,6 +234,7 @@ model Blog {
   content     String         @db.Text
   image       String?
   type        BlogType       @default(BLOG)
+  hearts      Int            @default(0)
   createdAt   DateTime       @default(now()) @map("created_at")
   updatedAt   DateTime       @updatedAt @map("updated_at")
   user        User           @relation(fields: [userId], references: [id])
