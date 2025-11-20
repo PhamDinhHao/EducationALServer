@@ -2,17 +2,24 @@ import { Request, Response } from 'express'
 import * as blogService from '@/services/blog.service'
 import { User } from '@prisma/client'
 import _ from 'lodash'
-import catchAsync from '@/utils/catchAsync'
+import catchAsync from '@utils/catchAsync'
 
+export const heartBlog = catchAsync(async (req: Request, res: Response) => {
+  const id = parseInt(req.params.id)
+  const hearted = await blogService.heartBlog(id)
+  res.json(hearted)
+})
 export const getRelatedBlogs = async (req: Request, res: Response) => {
   const id = parseInt(req.params.id)
-  const relatedBlogs = await blogService.getRelatedBlogs(id)
+  const type = req.query.type as 'BLOG' | 'CONTESTS' | undefined
+  const relatedBlogs = await blogService.getRelatedBlogs(id, type)
   res.json(relatedBlogs)
 }
 
 export const getRecentBlogs = async (req: Request, res: Response) => {
   const limit = req.query.limit
-  const recentBlogs = await blogService.getRecentBlogs(Number(limit))
+  const type = req.query.type as 'BLOG' | 'CONTESTS'
+  const recentBlogs = await blogService.getRecentBlogs(Number(limit), type)
   res.json(recentBlogs)
 }
 
@@ -37,8 +44,7 @@ export const listAllBlogs = async (req: Request, res: Response) => {
       page: Number(query.page ?? 1)
     }
 
-    const filter = _.pick(query, ['title', 'tags', 'userId', 'createdAt'])
-
+    const filter = _.pick(query, ['title', 'tags', 'userId', 'createdAt', 'type'])
     const result = await blogService.queryBlogs(options, filter)
     res.json(result)
   } catch (err: unknown) {
@@ -67,8 +73,7 @@ export const getBlogById = async (req: Request, res: Response) => {
 
 export const createBlog = catchAsync(async (req, res) => {
   const user = req.user as User
-  console.log('req.file:', req.file)
-  const { title, content, tags } = req.body
+  const { title, content, tags, type } = req.body
   const image = req.file ? req.file : null
 
   if (!title || !content) {
@@ -80,7 +85,8 @@ export const createBlog = catchAsync(async (req, res) => {
       title,
       content,
       image,
-      tags
+      tags,
+      type
     })
 
     res.status(201).json(created)
@@ -98,7 +104,6 @@ export const updateBlog = catchAsync(async (req, res) => {
   const id = parseInt(req.params.id)
   const { title, content, tags } = req.body
   const image = req.file ? req.file : null
-  console.log('req.body:', req.body)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const updated = await blogService.updateBlog(user.id, id, { title, content, tags, image })

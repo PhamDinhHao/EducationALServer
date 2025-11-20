@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `blogs` ADD COLUMN `type` ENUM('BLOG', 'CONTESTS') NOT NULL DEFAULT 'BLOG';
