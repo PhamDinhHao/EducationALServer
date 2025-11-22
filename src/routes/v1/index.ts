@@ -19,6 +19,7 @@ import progressRoute from './progress.routes'
 import blogRoute from './blog.route'
 import blogCommentRoute from './blogComment.route'
 import blogTagRoute from './blogTag.route'
+import certificateRoute from './certificate.routes'
 const router = express.Router()
 
 router.get('/test', (req, res) => {
@@ -67,7 +68,8 @@ const defaultRoutes = [
   { path: '/progress', route: progressRoute },
   { path: '/blogs', route: blogRoute },
   { path: '/blog-comments', route: blogCommentRoute },
-  { path: '/blog-tags', route: blogTagRoute }
+  { path: '/blog-tags', route: blogTagRoute },
+  { path: '/certificates', route: certificateRoute }
 ]
 
 defaultRoutes.forEach((route) => {

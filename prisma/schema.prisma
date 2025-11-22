@@ -67,6 +67,7 @@ model User {
   LessonProgress   LessonProgress[]
   Blog             Blog[]
   BlogComment      BlogComment[]
+  Certificates     Certificate[]
 
   @@map("users")
 }
@@ -151,6 +152,7 @@ model Course {
   courseType    CourseType         @relation(fields: [courseTypeId], references: [id])
   lessons       Lesson[]
   enrollments   CourseEnrollment[]
+  certificates  Certificate[]
 
   @@index([courseTypeId], map: "courses_course_type_id_fkey")
   @@map("courses")
@@ -280,5 +282,24 @@ enum BlogType {
   CONTESTS
 
   @@map("blog_type_enum")
+}
+
+model Certificate {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  courseId    Int      @map("course_id")
+  certificateNumber String @unique @map("certificate_number")
+  issuedAt    DateTime @default(now()) @map("issued_at")
+  pdfUrl      String?  @db.Text @map("pdf_url")
+  imageUrl    String?  @db.Text @map("image_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  user        User     @relation(fields: [userId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId], map: "certificates_user_id_course_id_key")
+  @@index([userId], map: "certificates_user_id_fkey")
+  @@index([courseId], map: "certificates_course_id_fkey")
+  @@map("certificates")
 }
 
