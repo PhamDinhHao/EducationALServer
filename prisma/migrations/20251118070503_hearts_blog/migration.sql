@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `blogs` ADD COLUMN `hearts` INTEGER NOT NULL DEFAULT 0;
