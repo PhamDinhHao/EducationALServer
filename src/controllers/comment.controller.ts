@@ -17,7 +17,8 @@ export const getComments = async (req: Request, res: Response) => {
 
 export const postComment = async (req: Request, res: Response) => {
   const lessonId = parseInt(req.params.lessonId);
-  const { author, content, parentId } = req.body;
+  const { author, content, parentId, userId } = req.body;
+  const user = req.user as { id: number } | undefined;
 
   if (!author || !content) {
     return res.status(400).json({ message: "Thiếu thông tin bình luận" });
@@ -25,10 +26,11 @@ export const postComment = async (req: Request, res: Response) => {
 
   try {
     let comment;
+    const commentUserId = userId || user?.id;
     if (parentId) {
-      comment = await commentService.createReply(lessonId, parentId, author, content);
+      comment = await commentService.createReply(lessonId, parentId, author, content, commentUserId);
     } else {
-      comment = await commentService.createComment(lessonId, author, content);
+      comment = await commentService.createComment(lessonId, author, content, commentUserId);
     }
 
     res.status(201).json(comment);

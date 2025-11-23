@@ -641,11 +641,12 @@ function renderCoursesTable(courses) {
   tbody.empty();
   
   if (courses.length === 0) {
-    tbody.append('<tr><td colspan="7" class="text-center">Không có dữ liệu</td></tr>');
+    tbody.append('<tr><td colspan="8" class="text-center">Không có dữ liệu</td></tr>');
     return;
   }
   
   courses.forEach(course => {
+    const levelText = course.level === 'BASIC' ? 'Cơ bản' : course.level === 'APPLICATION' ? 'Ứng dụng' : '-';
     const row = `
       <tr>
         <td>${course.id}</td>
@@ -653,6 +654,7 @@ function renderCoursesTable(courses) {
         <td>${course.teacher || '-'}</td>
         <td>${course.students || 0}</td>
         <td>${course.courseType?.name || course.courseTypeId || '-'}</td>
+        <td>${levelText}</td>
         <td>${formatDate(course.createdAt)}</td>
         <td>
           <button class="btn btn-sm btn-info btn-edit-course" data-id="${course.id}" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
@@ -738,6 +740,15 @@ function showCourseModal(courseId = null) {
                       ${optionsHtml}
                     </select>
                   </div>
+                  <div class="form-group">
+                    <label>Mức độ khóa học</label>
+                    <select class="form-control" id="courseLevel">
+                      <option value="">Chọn mức độ (tùy chọn)</option>
+                      <option value="BASIC">Cơ bản</option>
+                      <option value="APPLICATION">Ứng dụng</option>
+                    </select>
+                    <small class="form-text text-muted">Chọn mức độ để phân loại khóa học (Cơ bản hoặc Ứng dụng)</small>
+                  </div>
                 </form>
               </div>
               <div class="modal-footer">
@@ -777,6 +788,7 @@ function showCourseModal(courseId = null) {
             $('#courseUrl').val(course.url || '');
             $('#courseDuration').val(course.duration || '');
             $('#courseTypeId').val(course.courseTypeId || course.courseType?.id);
+            $('#courseLevel').val(course.level || '');
           },
           error: function(xhr) {
             alert('Lỗi tải thông tin khóa học: ' + formatErrorMessage(xhr));
@@ -799,6 +811,7 @@ function saveCourse() {
     return;
   }
   
+  const level = $('#courseLevel').val();
   const data = {
     title: $('#courseTitle').val(),
     description: $('#courseDescription').val() || '',
@@ -806,7 +819,8 @@ function saveCourse() {
     img: $('#courseImg').val() || null,
     url: $('#courseUrl').val() || null,
     duration: $('#courseDuration').val() || null,
-    courseTypeId: parseInt(courseTypeId)
+    courseTypeId: parseInt(courseTypeId),
+    level: level ? level : null
   };
   
   const url = courseId ? `${API_BASE_URL}/courses/${courseId}` : `${API_BASE_URL}/courses`;

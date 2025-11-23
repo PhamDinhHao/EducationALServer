@@ -1,4 +1,5 @@
 import prisma from '@/client'
+import { CourseLevel } from '@prisma/client'
 
 export const listCourses = async () => {
   const courses = await prisma.course.findMany({
@@ -46,6 +47,7 @@ export const createCourse = async (input: {
   students?: number
   duration?: string | null
   courseTypeId: number
+  level?: CourseLevel | null
 }) => {
   return prisma.course.create({ data: input })
 }
@@ -61,6 +63,7 @@ export const updateCourse = async (
     students: number
     duration?: string | null
     courseTypeId: number
+    level?: CourseLevel | null
   }>
 ) => {
   return prisma.course.update({ where: { id }, data: input })

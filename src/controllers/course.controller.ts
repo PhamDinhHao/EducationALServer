@@ -4,6 +4,7 @@ import uploadService from '@/services/upload.service'
 import ApiError from '@/utils/ApiError'
 import httpStatus from 'http-status'
 import catchAsync from '@/utils/catchAsync'
+import { CourseLevel } from '@prisma/client'
 
 export const listCourses = async (_req: Request, res: Response) => {
   try {
@@ -27,11 +28,21 @@ export const getCourseById = async (req: Request, res: Response) => {
 }
 
 export const createCourse = async (req: Request, res: Response) => {
-  const { title, description, img, url, teacher, students, duration, courseTypeId } = req.body
+  const { title, description, img, url, teacher, students, duration, courseTypeId, level } = req.body
   if (!title || !description || !teacher || !courseTypeId) {
     return res.status(400).json({ message: 'Thiếu dữ liệu bắt buộc' })
   }
   try {
+    // Validate and convert level string to enum
+    let levelEnum: CourseLevel | null = null
+    if (level) {
+      if (level === 'BASIC' || level === 'APPLICATION') {
+        levelEnum = level as CourseLevel
+      } else {
+        return res.status(400).json({ message: 'Level không hợp lệ. Chỉ chấp nhận BASIC hoặc APPLICATION' })
+      }
+    }
+    
     const created = await courseService.createCourse({
       title,
       description,
@@ -40,7 +51,8 @@ export const createCourse = async (req: Request, res: Response) => {
       teacher,
       students: students ? Number(students) : undefined,
       duration: duration ?? null,
-      courseTypeId: Number(courseTypeId)
+      courseTypeId: Number(courseTypeId),
+      level: levelEnum
     })
     res.status(201).json(created)
   } catch (err: any) {
@@ -52,7 +64,19 @@ export const updateCourse = async (req: Request, res: Response) => {
   const id = parseInt(req.params.id)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
-    const updated = await courseService.updateCourse(id, req.body)
+    // Validate and convert level string to enum if provided
+    const updateData: any = { ...req.body }
+    if (updateData.level !== undefined) {
+      if (updateData.level === null || updateData.level === '') {
+        updateData.level = null
+      } else if (updateData.level === 'BASIC' || updateData.level === 'APPLICATION') {
+        updateData.level = updateData.level as CourseLevel
+      } else {
+        return res.status(400).json({ message: 'Level không hợp lệ. Chỉ chấp nhận BASIC hoặc APPLICATION' })
+      }
+    }
+    
+    const updated = await courseService.updateCourse(id, updateData)
     res.json(updated)
   } catch (err: any) {
     res.status(500).json({ message: err.message })

@@ -137,6 +137,11 @@ model CourseType {
   @@map("course_types")
 }
 
+enum CourseLevel {
+  BASIC       // Cơ bản
+  APPLICATION // Ứng dụng
+}
+
 model Course {
   id            Int                @id @default(autoincrement())
   title         String
@@ -147,6 +152,7 @@ model Course {
   students      Int                @default(0)
   duration      String?
   courseTypeId  Int                @map("course_type_id")
+  level         CourseLevel?       @default(BASIC)
   createdAt     DateTime           @default(now()) @map("created_at")
   updatedAt     DateTime           @updatedAt @map("updated_at")
   courseType    CourseType         @relation(fields: [courseTypeId], references: [id])

@@ -8,8 +8,26 @@ export const getCommentsByLesson = async (lessonId: number) => {
     where: { lessonId, parentId: null }, // chỉ lấy comment cha
     orderBy: { createdAt: 'desc' },
     include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true
+        }
+      },
       replies: {
         orderBy: { createdAt: 'asc' }, // replies sắp xếp tăng dần
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              avatar: true
+            }
+          }
+        }
       }
     },
   });
@@ -44,14 +62,25 @@ export const getCommentCount = async () => {
 };
 
 
-export const createComment = async (lessonId: number, author: string, content: string) => {
+export const createComment = async (lessonId: number, author: string, content: string, userId?: number) => {
   return prisma.comment.create({
     data: {
       lessonId,
       author,
       content,
-      parentId: null
+      parentId: null,
+      userId: userId || null
     },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true
+        }
+      }
+    }
   });
 };
 
@@ -59,7 +88,8 @@ export const createReply = async (
   lessonId: number,
   parentId: number,
   author: string,
-  content: string
+  content: string,
+  userId?: number
 ) => {
   return prisma.comment.create({
     data: {
@@ -67,6 +97,17 @@ export const createReply = async (
       author,
       content,
       parentId,
+      userId: userId || null
     },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatar: true
+        }
+      }
+    }
   });
 };
