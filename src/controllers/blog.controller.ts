@@ -44,7 +44,7 @@ export const listAllBlogs = async (req: Request, res: Response) => {
       page: Number(query.page ?? 1)
     }
 
-    const filter = _.pick(query, ['title', 'tags', 'userId', 'createdAt', 'type'])
+    const filter = _.pick(query, ['title', 'tags', 'userId', 'createdAt', 'type', 'category'])
     const result = await blogService.queryBlogs(options, filter)
     res.json(result)
   } catch (err: unknown) {
@@ -73,7 +73,7 @@ export const getBlogById = async (req: Request, res: Response) => {
 
 export const createBlog = catchAsync(async (req, res) => {
   const user = req.user as User
-  const { title, content, tags, type } = req.body
+  const { title, content, tags, type, category } = req.body
   const image = req.file ? req.file : null
 
   if (!title || !content) {
@@ -86,7 +86,8 @@ export const createBlog = catchAsync(async (req, res) => {
       content,
       image,
       tags,
-      type
+      type,
+      category
     })
 
     res.status(201).json(created)
@@ -102,11 +103,11 @@ export const createBlog = catchAsync(async (req, res) => {
 export const updateBlog = catchAsync(async (req, res) => {
   const user = req.user as User
   const id = parseInt(req.params.id)
-  const { title, content, tags } = req.body
+  const { title, content, tags, category } = req.body
   const image = req.file ? req.file : null
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
-    const updated = await blogService.updateBlog(user.id, id, { title, content, tags, image })
+    const updated = await blogService.updateBlog(user.id, id, { title, content, tags, image, category })
     res.json(updated)
   } catch (err: unknown) {
     if (err instanceof Error) {
