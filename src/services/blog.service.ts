@@ -8,7 +8,7 @@ export const heartBlog = async (id: number) => {
 }
 export const queryBlogs = async (
   options: { limit?: number; page?: number; sortBy?: string; sortType?: 'asc' | 'desc' },
-  filter: { title?: string; tags?: string; userId?: number; type?: 'BLOG' | 'CONTESTS' }
+  filter: { title?: string; tags?: string; userId?: number; type?: 'BLOG' | 'CONTESTS'; category?: 'STUDENT' | 'TEACHER' | 'CONTEST' }
 ) => {
   const page = Number(options.page ?? 1)
   const limit = Number(options.limit ?? 12)
@@ -34,7 +34,8 @@ export const queryBlogs = async (
             }
           }
         : {}),
-      ...(filter.type ? { type: filter.type } : {})
+      ...(filter.type ? { type: filter.type } : {}),
+      ...(filter.category ? { category: filter.category } : {})
     }
   })
   const total = await prisma.blog.count({
@@ -177,6 +178,7 @@ export const createBlog = async (
     image?: Express.Multer.File | null
     tags?: string | null
     type?: 'BLOG' | 'CONTESTS'
+    category?: 'STUDENT' | 'TEACHER' | 'CONTEST'
   }
 ) => {
   console.log(input)
@@ -204,7 +206,8 @@ export const createBlog = async (
           create: { name: t }
         }))
       },
-      type: input.type
+      type: input.type,
+      category: input.category
     },
     include: {
       tags: true
@@ -220,6 +223,7 @@ export const updateBlog = async (
     content: string
     image?: Express.Multer.File | null
     tags?: string | null
+    category?: 'STUDENT' | 'TEACHER' | 'CONTEST'
   }
 ) => {
   const tagsArray = input.tags?.split(',').map((t) => t.trim())
@@ -237,7 +241,8 @@ export const updateBlog = async (
             where: { name: t },
             create: { name: t }
           })) ?? []
-      }
+      },
+      category: input.category
     }
   })
 }

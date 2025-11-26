@@ -242,6 +242,7 @@ model Blog {
   content     String         @db.Text
   image       String?
   type        BlogType       @default(BLOG)
+  category    BlogCategory   @default(STUDENT)
   hearts      Int            @default(0)
   createdAt   DateTime       @default(now()) @map("created_at")
   updatedAt   DateTime       @updatedAt @map("updated_at")
@@ -288,6 +289,14 @@ enum BlogType {
   CONTESTS
 
   @@map("blog_type_enum")
+}
+
+enum BlogCategory {
+  STUDENT
+  TEACHER
+  CONTEST
+
+  @@map("blog_category_enum")
 }
 
 model Certificate {
