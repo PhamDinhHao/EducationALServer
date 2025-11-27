@@ -32,14 +32,7 @@ const makeRequest = async (messages: ChatMessage[], subject: string, imageFile?:
   try {
     const genAI = getGeminiClient()
 
-    // Lấy message cuối cùng từ user
-    const lastUserMessage = messages.filter((msg) => msg.role === 'user').pop()
-    if (!lastUserMessage) {
-      throw new Error('No user message found')
-    }
-
-    const prompt = lastUserMessage.content
-
+    const prompt = messages.map((msg) => msg.content).join('\n')
     // Xác định temperature dựa trên loại task
     const getTemperature = (subject: string, prompt: string): number => {
       if (subject === 'mindmap' || prompt.includes('mindmap')) {
