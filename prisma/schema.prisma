@@ -294,7 +294,8 @@ enum BlogType {
 enum BlogCategory {
   STUDENT
   TEACHER
-  CONTEST
+  MANAGEMENT_STAFF
+  NEW_TECHNOLOGY
 
   @@map("blog_category_enum")
 }

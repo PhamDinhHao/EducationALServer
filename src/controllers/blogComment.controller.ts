@@ -51,7 +51,6 @@ export const listAllBlogComments = async (req: Request, res: Response) => {
 export const postBlogComment = async (req: Request, res: Response) => {
   const blogId = parseInt(req.params.blogId)
   const { user_id, content, parent_id } = req.body
-  console.log('req.body:', req.body)
   if (!user_id || !content) {
     return res.status(400).json({ message: 'Thiếu thông tin bình luận' })
   }

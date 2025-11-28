@@ -8,7 +8,7 @@ export const heartBlog = async (id: number) => {
 }
 export const queryBlogs = async (
   options: { limit?: number; page?: number; sortBy?: string; sortType?: 'asc' | 'desc' },
-  filter: { title?: string; tags?: string; userId?: number; type?: 'BLOG' | 'CONTESTS'; category?: 'STUDENT' | 'TEACHER' | 'CONTEST' }
+  filter: { title?: string; tags?: string; userId?: number; type?: 'BLOG' | 'CONTESTS'; category?: 'STUDENT' | 'TEACHER' | 'MANAGEMENT_STAFF' | 'NEW_TECHNOLOGY' }
 ) => {
   const page = Number(options.page ?? 1)
   const limit = Number(options.limit ?? 12)
@@ -178,10 +178,9 @@ export const createBlog = async (
     image?: Express.Multer.File | null
     tags?: string | null
     type?: 'BLOG' | 'CONTESTS'
-    category?: 'STUDENT' | 'TEACHER' | 'CONTEST'
+    category?: 'STUDENT' | 'TEACHER' | 'MANAGEMENT_STAFF' | 'NEW_TECHNOLOGY'
   }
 ) => {
-  console.log(input)
   // 1. Xử lý ảnh trong content
   const base64Images = extractBase64Images(input.content)
   const uploadedUrls = await uploadBase64Images(userId, base64Images)
@@ -223,7 +222,7 @@ export const updateBlog = async (
     content: string
     image?: Express.Multer.File | null
     tags?: string | null
-    category?: 'STUDENT' | 'TEACHER' | 'CONTEST'
+    category?: 'STUDENT' | 'TEACHER' | 'MANAGEMENT_STAFF' | 'NEW_TECHNOLOGY'
   }
 ) => {
   const tagsArray = input.tags?.split(',').map((t) => t.trim())

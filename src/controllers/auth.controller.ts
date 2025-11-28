@@ -112,7 +112,6 @@ const getMe = catchAsync(async (req, res) => {
     where: { id: user.id },
     select: { id: true, email: true, name: true, avatar: true, role: true, isEmailVerified: true }
   })
-  console.log('user:', userWithAvatar)
   if (!userWithAvatar) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
   }

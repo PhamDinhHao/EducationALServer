@@ -6,7 +6,6 @@ export const queryBlogComments = async (
   options: { limit?: number; page?: number; sortBy?: string; sortType?: 'asc' | 'desc' },
   filter: { blogId?: number; userId?: number; parentId?: number; createdAt?: Date }
 ) => {
-  console.log(options, filter)
   const page = Number(options.page ?? 1)
   const limit = Number(options.limit ?? 12)
   const sortBy = options.sortBy ?? 'createdAt'

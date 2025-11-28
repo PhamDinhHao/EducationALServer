@@ -5,7 +5,6 @@ import { extractTextFromFile } from '@/utils/fileParser'
 const generateExam = catchAsync(async (req, res) => {
   // nhận matrix từ body
   const { matrix } = req.body
-
   // nhận file từ multer
   const file = req.file
   if (!file) {

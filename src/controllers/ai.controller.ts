@@ -26,7 +26,7 @@ const generateWithMessages = async (req: Request, res: Response, next: NextFunct
       }
     }
 
-    const result = await aiService.makeRequest(messages, subject || 'môn học', imageFileData)
+    const result = await aiService.makeRequest(messages, subject || '', imageFileData)
     return res.status(httpStatus.OK).json({ success: true, data: { result } })
   } catch (error) {
     return next(error)
@@ -38,9 +38,7 @@ const generateText = async (req: Request, res: Response, next: NextFunction) => 
     const { prompt } = req.body as { prompt: string }
     if (!prompt) return res.status(httpStatus.BAD_REQUEST).json({ success: false, message: 'prompt is required' })
 
-    console.log('🔹 Generating text with prompt length:', prompt.length)
     const result = await aiService.generateText(prompt)
-    console.log('✅ Text generation successful, result length:', result.length)
 
     return res.status(httpStatus.OK).json({ success: true, data: { result } })
   } catch (error) {
