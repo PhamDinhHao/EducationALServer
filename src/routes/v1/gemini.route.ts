@@ -1,5 +1,4 @@
 import express from 'express'
-import auth from '@/middlewares/auth'
 import validate from '@/middlewares/validate'
 import { geminiValidation } from '@/validations'
 import { geminiController } from '@/controllers'
