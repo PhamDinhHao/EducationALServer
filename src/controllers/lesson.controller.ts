@@ -78,7 +78,8 @@ export const deleteLesson = async (req: Request, res: Response) => {
 
 export const generateLesson = async (req: Request, res: Response) => {
   try {
-    const { grade, subject, topic, periods, lessonType } = req.body
+    const { grade, subject, topic, lessonType } = req.body
+    console.log(req.body)
     const file = req.file // file upload từ multer
 
     // Nếu có file thì đọc nội dung, không thì để undefined
@@ -94,16 +95,16 @@ export const generateLesson = async (req: Request, res: Response) => {
     let lessonPlan
     switch (lessonType) {
       case 'standard':
-        lessonPlan = await lessonService.generateStandardLesson(fileContent, grade, subject, topic, Number(periods))
+        lessonPlan = await lessonService.generateStandardLesson(fileContent, grade, subject, topic)
         break
       case 'active':
-        lessonPlan = await lessonService.generateActiveLearningLesson(fileContent, grade, subject, topic, Number(periods))
+        lessonPlan = await lessonService.generateActiveLearningLesson(fileContent, grade, subject, topic)
         break
       case 'integrated':
-        lessonPlan = await lessonService.generateIntegratedLesson(fileContent, grade, subject, topic, Number(periods))
+        lessonPlan = await lessonService.generateIntegratedLesson(fileContent, grade, subject, topic)
         break
       case 'steam':
-        lessonPlan = await lessonService.generateSTEAMLesson(fileContent, grade, subject, topic, Number(periods))
+        lessonPlan = await lessonService.generateSTEAMLesson(fileContent, grade, subject, topic)
         break
       default:
         return res.status(400).json({ message: 'Loại giáo án không hợp lệ' })
