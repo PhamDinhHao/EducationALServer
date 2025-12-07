@@ -19,6 +19,9 @@ const uploadImage = async <Key extends keyof Asset>(
   // Handle case where files can be an array or an object (from multipart form data)
   const allFiles = Array.isArray(files) ? files : Object.values(files).flat()
 
+
+  
+
   // Return early if there are no files to process
   if (!allFiles || allFiles.length === 0) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'No files to process')
