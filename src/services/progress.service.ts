@@ -7,10 +7,28 @@ export const upsertProgress = async (
   completedAt?: Date | null
 ) => {
   const clamp = (n: number) => Math.max(0, Math.min(100, n))
+  const newProgress = clamp(progress)
+
+  // Check existing progress to prevent downgrading
+  const existing = await prisma.lessonProgress.findUnique({
+    where: { userId_lessonId: { userId, lessonId } }
+  })
+
+  if (existing) {
+    // If already 100%, keep it 100%
+    if (existing.progress >= 100) {
+      if (newProgress < 100) return existing
+    }
+    // If new progress is lower than existing, ignore update (unless it's a significant reset which we generally don't want automatically)
+    if (newProgress <= existing.progress) {
+      return existing
+    }
+  }
+
   return prisma.lessonProgress.upsert({
     where: { userId_lessonId: { userId, lessonId } },
-    update: { progress: clamp(progress), completedAt: completedAt ?? null, lastViewedAt: new Date() },
-    create: { userId, lessonId, progress: clamp(progress), completedAt: completedAt ?? null, lastViewedAt: new Date() }
+    update: { progress: newProgress, completedAt: completedAt ?? null, lastViewedAt: new Date() },
+    create: { userId, lessonId, progress: newProgress, completedAt: completedAt ?? null, lastViewedAt: new Date() }
   })
 }
 
