@@ -44,7 +44,22 @@ export const updateLesson = async (
 }
 
 export const deleteLesson = async (id: number) => {
-  return prisma.lesson.delete({ where: { id } })
+  return prisma.$transaction(async (tx) => {
+    // 1. Delete all lesson progress
+    await tx.lessonProgress.deleteMany({
+      where: { lessonId: id }
+    })
+
+    // 2. Delete all comments for this lesson
+    await tx.comment.deleteMany({
+      where: { lessonId: id }
+    })
+
+    // 3. Finally delete the lesson
+    return tx.lesson.delete({
+      where: { id }
+    })
+  })
 }
 
 // Hàm gốc gọi Gemini để sinh giáo án
