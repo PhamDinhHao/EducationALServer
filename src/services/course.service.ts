@@ -70,7 +70,46 @@ export const updateCourse = async (
 }
 
 export const deleteCourse = async (id: number) => {
-  return prisma.course.delete({ where: { id } })
+  return prisma.$transaction(async (tx) => {
+    // 1. Get all lesson IDs for this course
+    const lessons = await tx.lesson.findMany({
+      where: { courseId: id },
+      select: { id: true }
+    })
+    const lessonIds = lessons.map(l => l.id)
+
+    if (lessonIds.length > 0) {
+      // 2. Delete all lesson progress
+      await tx.lessonProgress.deleteMany({
+        where: { lessonId: { in: lessonIds } }
+      })
+
+      // 3. Delete all comments for these lessons
+      await tx.comment.deleteMany({
+        where: { lessonId: { in: lessonIds } }
+      })
+
+      // 4. Delete all lessons
+      await tx.lesson.deleteMany({
+        where: { courseId: id }
+      })
+    }
+
+    // 5. Delete all enrollments
+    await tx.courseEnrollment.deleteMany({
+      where: { courseId: id }
+    })
+
+    // 6. Delete all certificates
+    await tx.certificate.deleteMany({
+      where: { courseId: id }
+    })
+
+    // 7. Finally delete the course
+    return tx.course.delete({
+      where: { id }
+    })
+  })
 }
 
 export const getTopEnrolledCourses = async (limit: number = 8) => {
@@ -131,7 +170,7 @@ export const queryCourses = async (options: {
 
 
   const where: any = {}
-  
+
   if (search) {
     where.OR = [
       { title: { contains: search } },
