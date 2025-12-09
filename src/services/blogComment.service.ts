@@ -12,7 +12,7 @@ export const queryBlogComments = async (
   const sortType = options.sortType ?? 'desc'
 
   const comments = await prisma.blogComment.findMany({
-    include: { user: true },
+    include: { user: true, blog: true },
     skip: (page - 1) * limit,
     take: limit,
     orderBy: { [sortBy]: sortType },
@@ -75,4 +75,11 @@ export const createBlogCommentReply = async (
       updatedAt: new Date()
     }
   })
+}
+
+/**
+ * Xóa comment
+ */
+export const deleteBlogComment = async (id: number) => {
+  return prisma.blogComment.delete({ where: { id } })
 }

@@ -3,6 +3,19 @@ import * as blogService from '@/services/blog.service'
 import { User } from '@prisma/client'
 import _ from 'lodash'
 import catchAsync from '@utils/catchAsync'
+import ApiError from '@/utils/ApiError'
+import httpStatus from 'http-status'
+import { uploadService } from '@/services'
+
+export const uploadImage = catchAsync(async (req, res) => {
+  const user = req.user as User
+  const file = req.file
+  if (!file) {
+    return res.status(400).json({ message: 'Vui lòng chọn file ảnh' })
+  }
+  const url = await blogService.uploadBlogImage(user.id, file)
+  res.json({ url })
+})
 
 export const heartBlog = catchAsync(async (req: Request, res: Response) => {
   const id = parseInt(req.params.id)
@@ -74,7 +87,7 @@ export const getBlogById = async (req: Request, res: Response) => {
 export const createBlog = catchAsync(async (req, res) => {
   const user = req.user as User
   const { title, content, tags, type, category } = req.body
-  const image = req.file ? req.file : null
+  const image = req.file ? req.file : (req.body.image as string | null)
 
   if (!title || !content) {
     return res.status(400).json({ message: 'Thiếu dữ liệu bắt buộc' })
@@ -104,7 +117,7 @@ export const updateBlog = catchAsync(async (req, res) => {
   const user = req.user as User
   const id = parseInt(req.params.id)
   const { title, content, tags, category } = req.body
-  const image = req.file ? req.file : null
+  const image = req.file ? req.file : (req.body.image as string | null)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const updated = await blogService.updateBlog(user.id, id, { title, content, tags, image, category })
@@ -132,3 +145,22 @@ export const deleteBlog = async (req: Request, res: Response) => {
     }
   }
 }
+export const uploadBlogImage = catchAsync(async (req: Request, res: Response) => {
+  const file = req.file;
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'No file provided');
+  }
+
+  const imageUrl = await uploadService.uploadImage('blogs', file.path);
+  
+  if (!imageUrl) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to upload image');
+  }
+
+  res.status(200).json({
+    success: true,
+    data: { url: imageUrl },
+    message: 'Image uploaded successfully'
+  });
+});

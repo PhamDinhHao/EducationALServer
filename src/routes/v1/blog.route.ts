@@ -13,4 +13,5 @@ router.post('/', auth(), upload.single('image'), blogController.createBlog)
 router.put('/:id', auth(), upload.single('image'), blogController.updateBlog)
 router.delete('/:id', blogController.deleteBlog)
 router.post('/:id/like', auth(), blogController.heartBlog)
+router.post('/upload-image', auth(), upload.single('image'), blogController.uploadBlogImage)
 export default router
