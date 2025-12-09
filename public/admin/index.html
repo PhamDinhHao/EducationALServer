@@ -124,6 +124,25 @@
                 <p>Tài nguyên</p>
               </a>
             </li>
+            <li class="nav-header">BLOG MANAGEMENT</li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="blogs">
+                <i class="nav-icon fas fa-newspaper"></i>
+                <p>Quản lý Blog</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="blog-tags">
+                <i class="nav-icon fas fa-tags"></i>
+                <p>Thẻ Blog</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-section="blog-comments">
+                <i class="nav-icon fas fa-comments"></i>
+                <p>Bình luận Blog</p>
+              </a>
+            </li>
           </ul>
         </nav>
       </div>
@@ -200,6 +219,48 @@
                     <i class="fas fa-comments"></i>
                   </div>
                   <a href="#" class="small-box-footer" data-section="comments">
+                    Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6">
+                <div class="small-box bg-purple stat-card">
+                  <div class="inner">
+                    <h3 id="stat-blogs">0</h3>
+                    <p>Blogs</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-newspaper"></i>
+                  </div>
+                  <a href="#" class="small-box-footer" data-section="blogs">
+                    Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6">
+                <div class="small-box bg-maroon stat-card">
+                  <div class="inner">
+                    <h3 id="stat-blog-tags">0</h3>
+                    <p>Thẻ Blog</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-tags"></i>
+                  </div>
+                  <a href="#" class="small-box-footer" data-section="blog-tags">
+                    Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6">
+                <div class="small-box bg-orange stat-card">
+                  <div class="inner">
+                    <h3 id="stat-blog-comments">0</h3>
+                    <p>Bình luận Blog</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-comments"></i>
+                  </div>
+                  <a href="#" class="small-box-footer" data-section="blog-comments">
                     Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
                   </a>
                 </div>
@@ -443,6 +504,96 @@
                       </tr>
                     </thead>
                     <tbody id="assetsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blogs Section -->
+          <div id="blogs-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Blog</h3>
+                <button class="btn btn-primary btn-sm float-right" id="btnAddBlog">
+                  <i class="fas fa-plus"></i> Thêm mới
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="blogsTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tiêu đề</th>
+                        <th>Tác giả</th>
+                        <th>Loại</th>
+                        <th>Danh mục</th>
+                        <th>Tim</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="blogsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blog Tags Section -->
+          <div id="blog-tags-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Thẻ Blog</h3>
+                <button class="btn btn-primary btn-sm float-right" id="btnAddBlogTag">
+                  <i class="fas fa-plus"></i> Thêm mới
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="blogTagsTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tên thẻ</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="blogTagsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blog Comments Section -->
+          <div id="blog-comments-section" class="content-section" style="display: none;">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Quản lý Bình luận Blog</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label>Lọc theo Blog:</label>
+                  <select class="form-control" id="blogCommentFilter">
+                    <option value="">Tất cả</option>
+                  </select>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped" id="blogCommentsTable">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Nội dung</th>
+                        <th>Người bình luận</th>
+                        <th>Blog</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="blogCommentsTableBody"></tbody>
                   </table>
                 </div>
               </div>

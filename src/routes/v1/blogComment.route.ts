@@ -6,4 +6,7 @@ const router = express.Router()
 router.get('/blogs/:blogId/comments', blogCommentController.listAllBlogComments)
 router.post('/blogs/:blogId/comments', blogCommentController.postBlogComment)
 
+router.get('/', blogCommentController.getAllBlogComments)
+router.delete('/:id', blogCommentController.deleteBlogComment)
+
 export default router

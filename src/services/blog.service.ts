@@ -175,7 +175,7 @@ export const createBlog = async (
   input: {
     title: string
     content: string
-    image?: Express.Multer.File | null
+    image?: Express.Multer.File | string | null
     tags?: string | null
     type?: 'BLOG' | 'CONTESTS'
     category?: 'STUDENT' | 'TEACHER' | 'MANAGEMENT_STAFF' | 'NEW_TECHNOLOGY'
@@ -187,7 +187,15 @@ export const createBlog = async (
   const cleanContent = replaceImagesInContent(input.content, base64Images, uploadedUrls)
 
   // 2. Xử lý ảnh thumbnail chính (nếu có)
-  const image = input.image ? await assetService.uploadImage(userId, [input.image]) : null
+  let imageSrc: string | null = null
+  if (input.image) {
+    if (typeof input.image === 'string') {
+      imageSrc = input.image
+    } else {
+      const uploaded = await assetService.uploadImage(userId, [input.image])
+      imageSrc = uploaded[0].src
+    }
+  }
 
   // 3. Xử lý tags
   const tagsArray = input.tags?.split(',').map((t) => t.trim())
@@ -198,7 +206,7 @@ export const createBlog = async (
       userId,
       title: input.title,
       content: cleanContent, // content đã thay link ảnh thật
-      image: image?.[0]?.src ?? null,
+      image: imageSrc,
       tags: {
         connectOrCreate: tagsArray?.map((t) => ({
           where: { name: t },
@@ -220,20 +228,29 @@ export const updateBlog = async (
   input: {
     title: string
     content: string
-    image?: Express.Multer.File | null
+    image?: Express.Multer.File | string | null
     tags?: string | null
     category?: 'STUDENT' | 'TEACHER' | 'MANAGEMENT_STAFF' | 'NEW_TECHNOLOGY'
   }
 ) => {
   const tagsArray = input.tags?.split(',').map((t) => t.trim())
-  const image = input.image ? await assetService.uploadImage(userId, [input.image]) : undefined
+  
+  let imageSrc: string | undefined = undefined
+  if (input.image) {
+    if (typeof input.image === 'string') {
+      imageSrc = input.image
+    } else {
+      const uploaded = await assetService.uploadImage(userId, [input.image])
+      imageSrc = uploaded[0].src
+    }
+  }
 
   return prisma.blog.update({
     where: { id },
     data: {
       title: input.title,
       content: input.content,
-      image: image?.[0]?.src,
+      image: imageSrc,
       tags: {
         connectOrCreate:
           tagsArray?.map((t) => ({
@@ -248,4 +265,9 @@ export const updateBlog = async (
 
 export const deleteBlog = async (id: number) => {
   return prisma.blog.delete({ where: { id } })
+}
+
+export const uploadBlogImage = async (userId: number, file: Express.Multer.File) => {
+  const uploaded = await assetService.uploadImage(userId, [file])
+  return uploaded[0].src
 }
