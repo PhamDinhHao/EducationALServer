@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string)
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' })
+const model = genAI.getGenerativeModel({ model: 'gemma-3-27b' })
 
 /**
  * Sinh kế hoạch cá nhân
