@@ -24,7 +24,7 @@ const getGeminiClient = () => {
 const MODELS_TO_TRY = [
   'gemini-2.0-flash-001', // 🏆 Model tối ưu nhất: nhanh nhất (2218ms), ổn định, chất lượng cao
   'gemini-2.0-flash', // Backup model 2.0 (2392ms)
-  'gemini-flash-latest', // Latest fallback (6337ms)
+  'gemma-3-27b', // Latest fallback (6337ms)
   'gemini-pro-latest' // Pro latest fallback (24165ms) - chậm nhưng chất lượng cao
 ]
 
