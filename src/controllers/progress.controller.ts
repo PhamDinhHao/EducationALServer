@@ -29,8 +29,8 @@ export const upsertProgress = async (req: Request, res: Response) => {
 }
 
 export const getLessonProgressForUser = async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.userId)
-  const lessonId = parseInt(req.params.lessonId)
+  const userId = parseInt(req.params.userId as string)
+  const lessonId = parseInt(req.params.lessonId as string)
   if (isNaN(userId) || isNaN(lessonId)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const item = await progressService.getLessonProgressForUser(userId, lessonId)
@@ -41,7 +41,7 @@ export const getLessonProgressForUser = async (req: Request, res: Response) => {
 }
 
 export const listProgressByCourseForUser = async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.userId)
+  const userId = parseInt(req.params.userId as string)
   const courseId = parseInt((req.query.course_id as string) || (req.query.courseId as string))
   if (isNaN(userId)) return res.status(400).json({ message: 'ID không hợp lệ' })
   if (courseId && isNaN(courseId)) return res.status(400).json({ message: 'Course ID không hợp lệ' })
@@ -83,7 +83,7 @@ export const getMyProgressByCourse = async (req: Request, res: Response) => {
 
 export const getMyLessonProgress = async (req: Request, res: Response) => {
   const user = req.user as { id: number }
-  const lessonId = parseInt(req.params.lessonId)
+  const lessonId = parseInt(req.params.lessonId as string)
   if (isNaN(lessonId)) return res.status(400).json({ message: 'Lesson ID không hợp lệ' })
 
   try {

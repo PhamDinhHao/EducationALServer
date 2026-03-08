@@ -36,12 +36,12 @@ export const getMyCertificates = async (req: Request, res: Response) => {
 
 export const getCertificateById = async (req: Request, res: Response) => {
   const user = req.user as { id: number }
-  const certificateId = parseInt(req.params.id)
-  
+  const certificateId = parseInt(req.params.id as string)
+
   if (!user?.id) {
     return res.status(401).json({ message: 'Unauthorized' })
   }
-  
+
   if (isNaN(certificateId)) {
     return res.status(400).json({ message: 'Certificate ID không hợp lệ' })
   }
@@ -59,12 +59,12 @@ export const getCertificateById = async (req: Request, res: Response) => {
 
 export const downloadCertificate = async (req: Request, res: Response) => {
   const user = req.user as { id: number }
-  const certificateId = parseInt(req.params.id)
-  
+  const certificateId = parseInt(req.params.id as string)
+
   if (!user?.id) {
     return res.status(401).json({ message: 'Unauthorized' })
   }
-  
+
   if (isNaN(certificateId)) {
     return res.status(400).json({ message: 'Certificate ID không hợp lệ' })
   }

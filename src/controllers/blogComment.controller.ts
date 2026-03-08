@@ -8,7 +8,7 @@ export const listAllBlogComments = async (req: Request, res: Response) => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = req.query
-    const blogId = parseInt(req.params.blogId)
+    const blogId = parseInt(req.params.blogId as string)
 
     let sortBy = query.sortBy ?? 'createdAt'
     let sortType: 'asc' | 'desc' = 'desc'
@@ -49,7 +49,7 @@ export const listAllBlogComments = async (req: Request, res: Response) => {
 /**
  */
 export const postBlogComment = async (req: Request, res: Response) => {
-  const blogId = parseInt(req.params.blogId)
+  const blogId = parseInt(req.params.blogId as string)
   const { user_id, content, parent_id } = req.body
   if (!user_id || !content) {
     return res.status(400).json({ message: 'Thiếu thông tin bình luận' })
@@ -120,7 +120,7 @@ export const getAllBlogComments = async (req: Request, res: Response) => {
  * Xóa comment
  */
 export const deleteBlogComment = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     await blogCommentService.deleteBlogComment(id)

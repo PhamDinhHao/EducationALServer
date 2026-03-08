@@ -16,7 +16,7 @@ export const listCourses = async (_req: Request, res: Response) => {
 }
 
 export const getCourseById = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const course = await courseService.getCourseById(id)
@@ -42,7 +42,7 @@ export const createCourse = async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'Level không hợp lệ. Chỉ chấp nhận BASIC hoặc APPLICATION' })
       }
     }
-    
+
     const created = await courseService.createCourse({
       title,
       description,
@@ -61,7 +61,7 @@ export const createCourse = async (req: Request, res: Response) => {
 }
 
 export const updateCourse = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     // Validate and convert level string to enum if provided
@@ -75,7 +75,7 @@ export const updateCourse = async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'Level không hợp lệ. Chỉ chấp nhận BASIC hoặc APPLICATION' })
       }
     }
-    
+
     const updated = await courseService.updateCourse(id, updateData)
     res.json(updated)
   } catch (err: any) {
@@ -84,7 +84,7 @@ export const updateCourse = async (req: Request, res: Response) => {
 }
 
 export const deleteCourse = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     await courseService.deleteCourse(id)
@@ -105,7 +105,7 @@ export const getTopEnrolledCourses = async (req: Request, res: Response) => {
 };
 
 export const getCoursesByCategoryId = async (req: Request, res: Response) => {
-  const categoryId = parseInt(req.params.categoryId);
+  const categoryId = parseInt(req.params.categoryId as string);
   if (isNaN(categoryId)) return res.status(400).json({ message: 'Category ID không hợp lệ' });
   try {
     const courses = await courseService.getCoursesByCategoryId(categoryId);
@@ -122,10 +122,10 @@ export const queryCourses = async (req: Request, res: Response) => {
     const sortBy = (req.query.sortBy as string) || 'createdAt';
     const sortType = (req.query.sortType as 'asc' | 'desc') || 'desc';
     const search = req.query.search as string | undefined;
-    const courseTypeId = req.query.course_type_id 
-      ? parseInt(req.query.course_type_id as string) 
-      : req.query.courseTypeId 
-        ? parseInt(req.query.courseTypeId as string) 
+    const courseTypeId = req.query.course_type_id
+      ? parseInt(req.query.course_type_id as string)
+      : req.query.courseTypeId
+        ? parseInt(req.query.courseTypeId as string)
         : undefined;
 
     const result = await courseService.queryCourses({
@@ -151,7 +151,7 @@ export const uploadCourseImage = catchAsync(async (req: Request, res: Response) 
   }
 
   const imageUrl = await uploadService.uploadImage('courses', file.path);
-  
+
   if (!imageUrl) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to upload image');
   }

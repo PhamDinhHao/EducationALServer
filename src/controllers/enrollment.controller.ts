@@ -26,7 +26,7 @@ export const unenroll = async (req: Request, res: Response) => {
 }
 
 export const listUserEnrollments = async (req: Request, res: Response) => {
-  const userId = parseInt(req.params.userId)
+  const userId = parseInt(req.params.userId as string)
   if (isNaN(userId)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const items = await enrollmentService.listUserEnrollments(userId)
@@ -57,7 +57,7 @@ export const listAllEnrollments = async (_req: Request, res: Response) => {
 
 export const checkEnrollment = async (req: Request, res: Response) => {
   const user = req.user as { id: number }
-  const courseId = parseInt(req.params.courseId)
+  const courseId = parseInt(req.params.courseId as string)
   if (isNaN(courseId)) return res.status(400).json({ message: 'ID khóa học không hợp lệ' })
   try {
     const result = await enrollmentService.checkEnrollment(user.id, courseId)

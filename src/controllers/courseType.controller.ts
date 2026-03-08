@@ -11,7 +11,7 @@ export const listCourseTypes = async (_req: Request, res: Response) => {
 }
 
 export const getCourseTypeById = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const item = await courseTypeService.getCourseTypeById(id)
@@ -34,7 +34,7 @@ export const createCourseType = async (req: Request, res: Response) => {
 }
 
 export const updateCourseType = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const updated = await courseTypeService.updateCourseType(id, req.body)
@@ -45,7 +45,7 @@ export const updateCourseType = async (req: Request, res: Response) => {
 }
 
 export const deleteCourseType = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     await courseTypeService.deleteCourseType(id)

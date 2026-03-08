@@ -15,7 +15,7 @@ export const listAllBlogTags = async (_req: Request, res: Response) => {
 }
 
 export const getBlogTagById = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const blogTag = await blogTagService.getBlogTagById(id)
@@ -47,7 +47,7 @@ export const createBlogTag = async (req: Request, res: Response) => {
 }
 
 export const updateBlogTag = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const updated = await blogTagService.updateBlogTag(id, req.body)
@@ -62,7 +62,7 @@ export const updateBlogTag = async (req: Request, res: Response) => {
 }
 
 export const deleteBlogTag = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     await blogTagService.deleteBlogTag(id)

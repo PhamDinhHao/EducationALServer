@@ -12,7 +12,7 @@ export const listAllLessons = async (_req: Request, res: Response) => {
 }
 
 export const getLessonsByCourse = async (req: Request, res: Response) => {
-  const courseId = parseInt(req.params.id)
+  const courseId = parseInt(req.params.id as string)
   if (isNaN(courseId)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const lessons = await lessonService.getLessonsByCourse(courseId)
@@ -23,7 +23,7 @@ export const getLessonsByCourse = async (req: Request, res: Response) => {
 }
 
 export const getLessonById = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const lesson = await lessonService.getLessonById(id)
@@ -55,7 +55,7 @@ export const createLesson = async (req: Request, res: Response) => {
 }
 
 export const updateLesson = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const updated = await lessonService.updateLesson(id, req.body)
@@ -66,7 +66,7 @@ export const updateLesson = async (req: Request, res: Response) => {
 }
 
 export const deleteLesson = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     await lessonService.deleteLesson(id)

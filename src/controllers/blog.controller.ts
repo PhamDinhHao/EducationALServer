@@ -18,12 +18,12 @@ export const uploadImage = catchAsync(async (req, res) => {
 })
 
 export const heartBlog = catchAsync(async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   const hearted = await blogService.heartBlog(id)
   res.json(hearted)
 })
 export const getRelatedBlogs = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   const type = req.query.type as 'BLOG' | 'CONTESTS' | undefined
   const relatedBlogs = await blogService.getRelatedBlogs(id, type)
   res.json(relatedBlogs)
@@ -70,7 +70,7 @@ export const listAllBlogs = async (req: Request, res: Response) => {
 }
 
 export const getBlogById = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     const blog = await blogService.getBlogById(id)
@@ -132,7 +132,7 @@ export const updateBlog = catchAsync(async (req, res) => {
 })
 
 export const deleteBlog = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id)
+  const id = parseInt(req.params.id as string)
   if (isNaN(id)) return res.status(400).json({ message: 'ID không hợp lệ' })
   try {
     await blogService.deleteBlog(id)

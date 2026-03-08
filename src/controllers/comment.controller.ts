@@ -3,7 +3,7 @@ import * as commentService from "../services/comment.service";
 
 
 export const getComments = async (req: Request, res: Response) => {
-  const lessonId = parseInt(req.params.lessonId);
+  const lessonId = parseInt(req.params.lessonId as string);
   if (isNaN(lessonId)) return res.status(400).json({ message: "ID không hợp lệ" });
 
   try {
@@ -16,7 +16,7 @@ export const getComments = async (req: Request, res: Response) => {
 
 
 export const postComment = async (req: Request, res: Response) => {
-  const lessonId = parseInt(req.params.lessonId);
+  const lessonId = parseInt(req.params.lessonId as string);
   const { author, content, parentId, userId } = req.body;
   const user = req.user as { id: number } | undefined;
 
