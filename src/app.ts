@@ -19,6 +19,8 @@ import path from 'path'
 
 const app = express()
 
+console.log('DATABASE_URL:', process.env.DATABASE_URL);
+
 if (config.env !== 'test') {
   app.use(morgan.successHandler)
   app.use(morgan.errorHandler)
